@@ -2,3 +2,5 @@
 app/*
 photo/*
 *.bak
+dbaccess.config.js
+passwords.config.js
