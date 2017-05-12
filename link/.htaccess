@@ -1,0 +1,4 @@
+RewriteEngine on
+
+RewriteCond %{REQUEST_URI} !^/link/link(\.php)?(.*)$
+RewriteRule (.*) /link/link.php?a=$1 [QSA,NC]

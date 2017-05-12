@@ -1,0 +1,12 @@
+Options -Indexes
+
+RewriteEngine on
+
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,QSA,L]
+
+RewriteRule ^key/.*$ - [F,L,NC]

@@ -1,0 +1,4 @@
+*.pem
+app/*
+photo/*
+*.bak
