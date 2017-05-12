@@ -2,7 +2,7 @@
 
 function CreateDBConnection($database)
 {
-	$fh = fopen("dbaccess.config.js");
+	$fh = fopen("dbaccess.config.js", "r");
 	$data = fread($fh, filesize("dbaccess.config.js"));
 	fclose($fh);
 
