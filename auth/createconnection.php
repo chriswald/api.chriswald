@@ -2,8 +2,9 @@
 
 function CreateDBConnection($database)
 {
-	$fh = fopen("dbaccess.config.js", "r");
-	$data = fread($fh, filesize("dbaccess.config.js"));
+	$configFile = "../auth/dbaccess.config.js";
+	$fh = fopen($configFile, "r");
+	$data = fread($fh, filesize($configFile));
 	fclose($fh);
 
 	$props = json_decode($data);
