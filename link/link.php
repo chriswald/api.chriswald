@@ -160,6 +160,11 @@ function Process($configObject)
         {
             $responseObject = ExecScript($dataSource->Properties, $responseObject["Object"]);
         }
+        else
+        {
+            $obj = ["Error" => "Unsupported data source"];
+            $responseObject = ReturnResponse(400, $obj);
+        }
 
         if ($responseObject["Status"] !== 200)
         {
@@ -178,7 +183,8 @@ function Dispatch($configObject)
     }
     else
     {
-        return ReturnResponse(403, null);
+        $obj = ["Error" => "Unauthorized"];
+        return ReturnResponse(403, $obj);
     }
 }
 

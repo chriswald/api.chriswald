@@ -17,7 +17,6 @@ class Security
     {
         if ($this->session->TokenIsExpired())
         {
-            echo "token expired";
             return False;
         }
 
