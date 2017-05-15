@@ -350,7 +350,7 @@ function Process($configObject)
         {
             $obj = ["Error" => $error];
             $responseObject = ReturnResponse(500, $obj);
-            break;
+            return $responseObject;
         }
 
         if (strcasecmp($dataSource->Type, "Database") === 0)
@@ -372,7 +372,7 @@ function Process($configObject)
         {
             $obj = ["Error" => $error];
             $responseObject = ReturnResponse(500, $obj);
-            break;
+            return $responseObject;
         }
     }
 
