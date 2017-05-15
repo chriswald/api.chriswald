@@ -25,17 +25,31 @@ function ParseConfigFromFile($configFile, &$configObject)
     }
 }
 
-function GetApiPointConfig($apiPoint, &$configObject)
+function GetApiPointConfig($apiPoint, &$configObject, &$error)
 {
     $configFile = FileFromCurrentDirectory($apiPoint);
-    if (file_exists($configFile)
-        && ParseConfigFromFile($configFile, $configObject)
-        && $configObject !== null)
+
+    if (file_exists($configFile))
     {
-        return true;
+        if (ParseConfigFromFile($configFile, $configObject))
+        {
+            if ($configObject !== null)
+            {
+                return true;
+            }
+            else
+            {
+                $error = "Configuration is null";
+                return false;
+            }
+        }
+        else {
+            $error = "Failed to parse configuration file";
+            return false;
+        }
     }
-    else
-    {
+    else {
+        $error = "Cannot find configuration file";
         return false;
     }
 }
@@ -67,6 +81,68 @@ function HasSecurityAccess($configObject)
     foreach ($configObject->Security->RequiredPoints as $point)
     {
         if (!$user->GetSecurity()->HasSecurityPoint($point))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function HasDataSources($configObject)
+{
+    return isset($configObject->DataSources);
+}
+
+function HasDefiniedHttpMethod($configObject)
+{
+    return isset($configObject->HttpMethod);
+}
+
+function HasValidHttpMethod($configObject)
+{
+    if (!HasDefiniedHttpMethod($configObject))
+    {
+        $httpMethod = "POST";
+    }
+    else
+    {
+        $httpMethod = $configObject->HttpMethod;
+    }
+
+    return $_SERVER["REQUEST_METHOD"] === $httpMethod;
+}
+
+function HasRequiredRequestParameters($configObject)
+{
+    if (!isset($configObject->RequestParameters) ||
+        count($configObject->RequestParameters) === 0)
+    {
+        return true;
+    }
+
+    foreach ($configObject->RequestParameters as $param)
+    {
+        if (!isset($_POST[$param]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function HasRequiredQueryParameters($configObject)
+{
+    if (!isset($configObject->QueryParameters) ||
+        count($configObject->QueryParameters) === 0)
+    {
+        return true;
+    }
+
+    foreach ($configObject->QueryParameters as $param)
+    {
+        if (!isset($_GET[$param]))
         {
             return false;
         }
@@ -177,15 +253,44 @@ function Process($configObject)
 
 function Dispatch($configObject)
 {
-    if (HasSecurityAccess($configObject) && isset($configObject->DataSources))
+    $error = "";
+    if (PrerequisitsMet($configObject, $error))
     {
         return Process($configObject);
     }
     else
     {
-        $obj = ["Error" => "Unauthorized"];
+        $obj = ["Error" => $error];
         return ReturnResponse(403, $obj);
     }
+}
+
+function PrerequisitsMet($configObject, &$error)
+{
+    $error = "";
+
+    if (!HasSecurityAccess($configObject))
+    {
+        $error = "Unauthorized";
+    }
+    else if (!HasDataSources($configObject))
+    {
+        $error = "No data sources";
+    }
+    else if (!HasValidHttpMethod($configObject))
+    {
+        $error = "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method";
+    }
+    else if (!HasRequiredRequestParameters($configObject))
+    {
+        $error = "Missing required request parameters";
+    }
+    else if (!HasRequiredQueryParameters($configObject))
+    {
+        $error = "Missing required query string parameters";
+    }
+
+    return ($error === "");
 }
 
 function WriteResponse($response)
@@ -199,16 +304,17 @@ function Main()
 {
     $apiPoint = $_GET["a"];
     $configObject = "";
+    $error = "";
 
     $response = array();
 
-    if (GetApiPointConfig($apiPoint, $configObject))
+    if (GetApiPointConfig($apiPoint, $configObject, $error))
     {
         $response = Dispatch($configObject);
     }
     else
     {
-        $response = ReturnResponse(404, null);
+        $response = ReturnResponse(404, ["Error" => $error]);
     }
 
     WriteResponse($response);
