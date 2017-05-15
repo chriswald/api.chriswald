@@ -275,24 +275,24 @@ function GetParameterValues($configObject, $dataSource, &$dict, &$error)
     return true;
 }
 
-function SetResultValue($configObject, $dataSource, $result, &$error)
+function ParseResultProperty($configObject, $parentObj, &$dataGroup, &$nameInGroup, &$error)
 {
-    if (isset($dataSource->Result))
+    if (isset($parentObj->Result))
     {
-        if (isset($dataSource->Result->DataGroup) &&
-            $dataSource->Result->DataGroup !== "")
+        if (isset($parentObj->Result->DataGroup) &&
+            $parentObj->Result->DataGroup !== "")
         {
-            if (isset($dataSource->Result->NameInGroup) &&
-                $dataSource->Result->NameInGroup !== "")
+            $dataGroup = $parentObj->Result->DataGroup;
+            if (isset($parentObj->Result->NameInGroup) &&
+                $parentObj->Result->NameInGroup !== "")
             {
-                $grpName = $dataSource->Result->DataGroup;
-                if (in_array($grpName, $configObject->DataGroups))
+                $nameInGroup = $parentObj->Result->DataGroup;
+                if (in_array($nameInGroup, $configObject->DataGroups))
                 {
-                    $destName = $dataSource->Result->NameInGroup;
-                    $GLOBALS["DATAGROUPS"][$grpName][$destName] = $result;
+                    return true;
                 }
                 else {
-                    $error = "No group with the name {$grpName}";
+                    $error = "No group with the name {$nameInGroup}";
                     return false;
                 }
             }
@@ -312,8 +312,19 @@ function SetResultValue($configObject, $dataSource, $result, &$error)
         $error = "Data source result not configured";
         return false;
     }
+}
 
-    return true;
+function SetResultValue($configObject, $dataSource, $result, &$error)
+{
+    if (ParseResultProperty($configObject, $dataSource, $dataGroup, $nameInGroup, $error))
+    {
+        $GLOBALS["DATAGROUPS"][$grpName][$destName] = $result;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 function Process($configObject)
