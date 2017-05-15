@@ -175,7 +175,7 @@ function ExecScript($dbProps, $parameters)
     $executable = "include_once \"$filename\"; return $entry();";
 
     $retVal = eval($executable);
-    return ReturnResponse(200, $retVal);
+    return $retVal;
 }
 
 function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
@@ -318,7 +318,7 @@ function SetResultValue($configObject, $dataSource, $result, &$error)
 {
     if (ParseResultProperty($configObject, $dataSource, $dataGroup, $nameInGroup, $error))
     {
-        $GLOBALS["DATAGROUPS"][$grpName][$destName] = $result;
+        $GLOBALS["DATAGROUPS"][$dataGroup][$nameInGroup] = $result;
         return true;
     }
     else
@@ -327,9 +327,21 @@ function SetResultValue($configObject, $dataSource, $result, &$error)
     }
 }
 
+function CreateResultObject($configObject, &$resultObj, &$error)
+{
+    if (ParseResultProperty($configObject, $configObject, $dataGroup, $nameInGroup, $error))
+    {
+        $obj = $GLOBALS["DATAGROUPS"][$dataGroup][$nameInGroup];
+        $resultObj = ReturnResponse(200, $obj);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 function Process($configObject)
 {
-    $responseObject = ReturnResponse(200, null);
     $datasourceObj = [];
 
     foreach ($configObject->DataSources as $dataSource)
@@ -347,12 +359,13 @@ function Process($configObject)
         }
         else if (strcasecmp($dataSource->Type, "Script") === 0)
         {
-            $responseObject = ExecScript($dataSource->Properties, $responseObject["Object"]);
+            $datasourceObj = ExecScript($dataSource->Properties, $parameterDict);
         }
         else
         {
             $obj = ["Error" => "Unsupported data source"];
             $responseObject = ReturnResponse(500, $obj);
+            break;
         }
 
         if (!SetResultValue($configObject, $dataSource, $datasourceObj, $error))
@@ -361,14 +374,12 @@ function Process($configObject)
             $responseObject = ReturnResponse(500, $obj);
             break;
         }
-        else {
-            $responseObject = ReturnResponse(200, $datasourceObj);
-        }
+    }
 
-        if ($responseObject["Status"] !== 200)
-        {
-            break;
-        }
+    if (!CreateResultObject($configObject, $responseObject, $error))
+    {
+        $obj = ["Error" => $error];
+        $responseObject = ReturnResponse(500, $obj);
     }
 
     return $responseObject;

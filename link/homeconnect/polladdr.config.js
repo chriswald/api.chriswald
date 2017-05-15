@@ -32,5 +32,10 @@
                 "NameInGroup": "QueryResult"
             }
         }
-    ]
+    ],
+
+    "Result": {
+        "DataGroup": "Result",
+        "NameInGroup": "QueryResult"
+    }
 }
