@@ -165,7 +165,7 @@ function DatabaseQuery($dbProps, $parameters)
     $statement = $pdo->prepare($query);
     $statement->execute($queryParams);
 
-    return ReturnResponse(200, $statement->fetchAll(PDO::FETCH_ASSOC));
+    return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function ExecScript($dbProps, $parameters)
@@ -243,7 +243,7 @@ function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
         }
         else
         {
-            $error = "Group name is not specified";
+            $error = "Group name of parameter is not specified";
             return false;
         }
     }
@@ -275,9 +275,51 @@ function GetParameterValues($configObject, $dataSource, &$dict, &$error)
     return true;
 }
 
+function SetResultValue($configObject, $dataSource, $result, &$error)
+{
+    if (isset($dataSource->Result))
+    {
+        if (isset($dataSource->Result->DataGroup) &&
+            $dataSource->Result->DataGroup !== "")
+        {
+            if (isset($dataSource->Result->NameInGroup) &&
+                $dataSource->Result->NameInGroup !== "")
+            {
+                $grpName = $dataSource->Result->DataGroup;
+                if (in_array($grpName, $configObject->DataGroups))
+                {
+                    $destName = $dataSource->Result->NameInGroup;
+                    $GLOBALS["DATAGROUPS"][$grpName][$destName] = $result;
+                }
+                else {
+                    $error = "No group with the name {$grpName}";
+                    return false;
+                }
+            }
+            else
+            {
+                $error = "Name to save result to in group not specified";
+                return false;
+            }
+        }
+        else
+        {
+            $error = "Group name of result is not specified";
+            return false;
+        }
+    }
+    else {
+        $error = "Data source result not configured";
+        return false;
+    }
+
+    return true;
+}
+
 function Process($configObject)
 {
     $responseObject = ReturnResponse(200, null);
+    $datasourceObj = [];
 
     foreach ($configObject->DataSources as $dataSource)
     {
@@ -290,7 +332,7 @@ function Process($configObject)
 
         if (strcasecmp($dataSource->Type, "Database") === 0)
         {
-            $responseObject = DatabaseQuery($dataSource->Properties, $parameterDict);
+            $datasourceObj = DatabaseQuery($dataSource->Properties, $parameterDict);
         }
         else if (strcasecmp($dataSource->Type, "Script") === 0)
         {
@@ -300,6 +342,16 @@ function Process($configObject)
         {
             $obj = ["Error" => "Unsupported data source"];
             $responseObject = ReturnResponse(500, $obj);
+        }
+
+        if (!SetResultValue($configObject, $dataSource, $datasourceObj, $error))
+        {
+            $obj = ["Error" => $error];
+            $responseObject = ReturnResponse(500, $obj);
+            break;
+        }
+        else {
+            $responseObject = ReturnResponse(200, $datasourceObj);
         }
 
         if ($responseObject["Status"] !== 200)
