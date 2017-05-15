@@ -3,6 +3,8 @@
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
 
+$DATAGROUPS = [];
+
 function FileFromCurrentDirectory($path)
 {
     if (substr($path, 0, 1) !== DIRECTORY_SEPARATOR)
@@ -31,17 +33,10 @@ function GetApiPointConfig($apiPoint, &$configObject, &$error)
 
     if (file_exists($configFile))
     {
-        if (ParseConfigFromFile($configFile, $configObject))
+        if (ParseConfigFromFile($configFile, $configObject) &&
+            $configObject !== null)
         {
-            if ($configObject !== null)
-            {
-                return true;
-            }
-            else
-            {
-                $error = "Configuration is null";
-                return false;
-            }
+            return true;
         }
         else {
             $error = "Failed to parse configuration file";
@@ -151,41 +146,6 @@ function HasRequiredQueryParameters($configObject)
     return true;
 }
 
-function RequestParameters($dbProps)
-{
-    if (isset($dbProps->Parameters))
-    {
-        $sourceArr = $_POST;
-
-        if (isset($dbProps->Source))
-        {
-            if (strcasecmp($dbProps->Source, "GET") === 0)
-            {
-                $sourceArr = $_GET;
-            }
-        }
-
-        $params = array();
-        foreach ($dbProps->Parameters as $param)
-        {
-            if (isset($_POST[$param]))
-            {
-                array_push($params, $_POST[$param]);
-            }
-            else
-            {
-                return ReturnResponse(400, null);
-            }
-        }
-
-        return ReturnResponse(200, $params);
-    }
-    else
-    {
-        return ReturnResponse(200, null);
-    }
-}
-
 function DatabaseQuery($dbProps, $parameters)
 {
     $dbName = $dbProps->Database;
@@ -218,19 +178,119 @@ function ExecScript($dbProps, $parameters)
     return ReturnResponse(200, $retVal);
 }
 
+function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
+{
+    if (!isset($paramDef->Source) ||
+        $paramDef->Source === "")
+    {
+        $error = "No parameter source specified";
+        return false;
+    }
+
+    if (!isset($paramDef->SourceParameterName) ||
+        $paramDef->SourceParameterName === "")
+    {
+        $error = "No source parameter name specified";
+        return false;
+    }
+
+    if (!isset($paramDef->DestinationParameterName) ||
+        $paramDef->DestinationParameterName === "")
+    {
+        $error = "No destination parameter name specified";
+        return false;
+    }
+
+    $source = $paramDef->Source;
+    $srcName = $paramDef->SourceParameterName;
+    $destName = $paramDef->DestinationParameterName;
+
+    if (strcasecmp($paramDef->Source, "RequestParameters") === 0)
+    {
+        if (in_array($srcName, $configObject->RequestParameters))
+        {
+            $destDict[$destName] = $_POST[$srcName];
+        }
+        else {
+            $error = "RequestParameters does not have the parameter {$srcName}";
+            return false;
+        }
+    }
+    else if (strcasecmp($paramDef->Source, "QueryParameters") === 0)
+    {
+        if (in_array($srcName, $configObject->QueryParameters))
+        {
+            $destDict[$destName] = $_GET[$srcName];
+        }
+        else {
+            $error = "QueryParameters does not have the parameter {$srcName}";
+            return false;
+        }
+    }
+    else if (strcasecmp($paramDef->Source, "DataGroups") === 0)
+    {
+        if (isset($paramDef->GroupName) && $paramDef->GroupName !== "")
+        {
+            $grpName = $paramDef->GroupName;
+            if (in_array($grpName, $configObject->DataGroups))
+            {
+                $destDict[$destName] = $GLOBALS["DATAGROUPS"][$grpName][$srcName];
+            }
+            else {
+                $error = "No group with the name {$grpName}";
+                return false;
+            }
+        }
+        else
+        {
+            $error = "Group name is not specified";
+            return false;
+        }
+    }
+    else
+    {
+        $error = "Parameter source {$paramDef->Source} is not a supported source";
+        return false;
+    }
+
+    return true;
+}
+
+function GetParameterValues($configObject, $dataSource, &$dict, &$error)
+{
+    if (!isset($dataSource->Parameters))
+    {
+        $dict = [];
+        return true;
+    }
+
+    foreach ($dataSource->Parameters as $paramDef)
+    {
+        if (!GetSingleParameterValue($configObject, $paramDef, $dict, $error))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function Process($configObject)
 {
     $responseObject = ReturnResponse(200, null);
 
     foreach ($configObject->DataSources as $dataSource)
     {
-        if (strcasecmp($dataSource->Type, "RequestParams") === 0)
+        if (!GetParameterValues($configObject, $dataSource, $parameterDict, $error))
         {
-            $responseObject = RequestParameters($dataSource->Properties);
+            $obj = ["Error" => $error];
+            $responseObject = ReturnResponse(500, $obj);
+            break;
         }
-        else if (strcasecmp($dataSource->Type, "Database") === 0)
+
+        if (strcasecmp($dataSource->Type, "Database") === 0)
         {
-            $responseObject = DatabaseQuery($dataSource->Properties, $responseObject["Object"]);
+            $responseObject = DatabaseQuery($dataSource->Properties, $parameterDict);
         }
         else if (strcasecmp($dataSource->Type, "Script") === 0)
         {
@@ -239,7 +299,7 @@ function Process($configObject)
         else
         {
             $obj = ["Error" => "Unsupported data source"];
-            $responseObject = ReturnResponse(400, $obj);
+            $responseObject = ReturnResponse(500, $obj);
         }
 
         if ($responseObject["Status"] !== 200)
@@ -256,12 +316,13 @@ function Dispatch($configObject)
     $error = "";
     if (PrerequisitsMet($configObject, $error))
     {
+        SetUpDataGroups($configObject);
         return Process($configObject);
     }
     else
     {
         $obj = ["Error" => $error];
-        return ReturnResponse(403, $obj);
+        return ReturnResponse(400, $obj);
     }
 }
 
@@ -291,6 +352,17 @@ function PrerequisitsMet($configObject, &$error)
     }
 
     return ($error === "");
+}
+
+function SetUpDataGroups($configObject)
+{
+    if (isset($configObject->DataGroups))
+    {
+        foreach ($configObject->DataGroups as $group)
+        {
+            $GLOBALS["DATAGROUPS"][$group] = [];
+        }
+    }
 }
 
 function WriteResponse($response)

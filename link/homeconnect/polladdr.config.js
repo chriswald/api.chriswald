@@ -3,21 +3,33 @@
         "RequiredPoints": [7]
     },
 
+    "HttpMethod": "POST",
+
+    "RequestParameters": [
+        "ID"
+    ],
+
+    "DataGroups": [
+        "Result"
+    ],
+
     "DataSources": [
         {
-            "Type": "RequestParams",
-            "Source": "POST",
-            "Properties": {
-                "Parameters": [
-                    "ID"
-                ]
-            }
-        },
-        {
             "Type": "Database",
+            "Parameters": [
+                {
+                    "Source": "RequestParameters",
+                    "SourceParameterName": "ID",
+                    "DestinationParameterName": "ID"
+                }
+            ],
             "Properties": {
                 "Database": "useraccess",
                 "Query": "SELECT IP, Port, LastUpdate FROM HomeClients WHERE HomeClients.ID = ?"
+            },
+            "Result": {
+                "DataGroup": "Result",
+                "NameInGroup": "QueryResult"
             }
         }
     ]
