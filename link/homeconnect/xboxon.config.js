@@ -7,7 +7,7 @@
         {
             "Type": "Script",
             "Properties": {
-                "File": "homeconnect/xboxon.php",
+                "File": "homeconnect/scripts/xboxon.php",
                 "Entrypoint": "ExecInit"
             }
         }
