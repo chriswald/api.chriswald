@@ -172,7 +172,8 @@ function ExecScript($dbProps, $parameters)
 {
     $filename = $dbProps->File;
     $entry = $dbProps->Entrypoint;
-    $executable = "include_once \"$filename\"; return $entry();";
+    $serialParams = serialize($parameters);
+    $executable = "include_once \"$filename\"; return $entry(unserialize('$serialParams'));";
 
     $retVal = eval($executable);
     return $retVal;
