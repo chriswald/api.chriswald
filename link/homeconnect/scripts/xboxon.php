@@ -26,18 +26,18 @@ function SendPacket($socket, $packet)
     }
 }
 
-function ExecInit()
+function ExecInit($params)
 {
     $XBOX_PORT = 5050;
     $XBOX_PING = "dd00000a000000000000000400000002";
 
-    $addr = $_POST["Address"];
-    $id = $_POST["LiveID"];
+    $addr = $params["Address"];
+    $id = $params["LiveID"];
 
     $socket = CreateSocket($addr, $XBOX_PORT);
     if ($socket === null)
     {
-        return -1;
+        return ["Success" => false];
     }
 
     $packet = CreatePacket($id);
