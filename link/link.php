@@ -68,6 +68,7 @@ function HasSecurityAccess($configObject)
         throw new LinkException(500, "The configuration does not specify security requirements");
     }
 
+    // Make sure the required points is of the correct type.
     if (!is_string($configObject->Security->RequiredPoints) &&
         !is_array($configObject->Security->RequiredPoints))
     {
