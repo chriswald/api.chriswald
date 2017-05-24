@@ -1,5 +1,6 @@
 <?php
 
+include_once "linkexception.php";
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
 
@@ -27,25 +28,19 @@ function ParseConfigFromFile($configFile, &$configObject)
     }
 }
 
-function GetApiPointConfig($apiPoint, &$configObject, &$error)
+function GetApiPointConfig($apiPoint, &$configObject)
 {
     $configFile = FileFromCurrentDirectory($apiPoint);
 
-    if (file_exists($configFile))
+    if (!file_exists($configFile))
     {
-        if (ParseConfigFromFile($configFile, $configObject) &&
-            $configObject !== null)
-        {
-            return true;
-        }
-        else {
-            $error = "Failed to parse configuration file";
-            return false;
-        }
+        throw new LinkException(404, "Cannot find configuration file");
     }
-    else {
-        $error = "Cannot find configuration file";
-        return false;
+
+    if (!ParseConfigFromFile($configFile, $configObject) ||
+        $configObject === null)
+    {
+        throw new LinkException(404, "Failed to parse configuration file");
     }
 }
 
@@ -179,27 +174,24 @@ function ExecScript($dbProps, $parameters)
     return $retVal;
 }
 
-function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
+function GetSingleParameterValue($configObject, $paramDef, &$destDict)
 {
     if (!isset($paramDef->Source) ||
         $paramDef->Source === "")
     {
-        $error = "No parameter source specified";
-        return false;
+        throw new LinkException(500, "No parameter source specified");
     }
 
     if (!isset($paramDef->SourceParameterName) ||
         $paramDef->SourceParameterName === "")
     {
-        $error = "No source parameter name specified";
-        return false;
+        throw new LinkException(500, "No source parameter name specified");
     }
 
     if (!isset($paramDef->DestinationParameterName) ||
         $paramDef->DestinationParameterName === "")
     {
-        $error = "No destination parameter name specified";
-        return false;
+        throw new LinkException(500, "No destination parameter name specified");
     }
 
     $source = $paramDef->Source;
@@ -213,8 +205,7 @@ function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
             $destDict[$destName] = $_POST[$srcName];
         }
         else {
-            $error = "RequestParameters does not have the parameter {$srcName}";
-            return false;
+            throw new LinkException(500, "RequestParameters does not have the parameter {$srcName}");
         }
     }
     else if (strcasecmp($paramDef->Source, "QueryParameters") === 0)
@@ -224,8 +215,7 @@ function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
             $destDict[$destName] = $_GET[$srcName];
         }
         else {
-            $error = "QueryParameters does not have the parameter {$srcName}";
-            return false;
+            throw new LinkException(500, "QueryParameters does not have the parameter {$srcName}");
         }
     }
     else if (strcasecmp($paramDef->Source, "DataGroups") === 0)
@@ -238,26 +228,23 @@ function GetSingleParameterValue($configObject, $paramDef, &$destDict, &$error)
                 $destDict[$destName] = $GLOBALS["DATAGROUPS"][$grpName][$srcName];
             }
             else {
-                $error = "No group with the name {$grpName}";
-                return false;
+                throw new LinkException(500, "No group with the name {$grpName}");
             }
         }
         else
         {
-            $error = "Group name of parameter is not specified";
-            return false;
+            throw new LinkException(500, "Group name of parameter is not specified");
         }
     }
     else
     {
-        $error = "Parameter source {$paramDef->Source} is not a supported source";
-        return false;
+        throw new LinkException(500, "Parameter source {$paramDef->Source} is not a supported source");
     }
 
     return true;
 }
 
-function GetParameterValues($configObject, $dataSource, &$dict, &$error)
+function GetParameterValues($configObject, $dataSource, &$dict)
 {
     if (!isset($dataSource->Parameters))
     {
@@ -267,7 +254,7 @@ function GetParameterValues($configObject, $dataSource, &$dict, &$error)
 
     foreach ($dataSource->Parameters as $paramDef)
     {
-        if (!GetSingleParameterValue($configObject, $paramDef, $dict, $error))
+        if (!GetSingleParameterValue($configObject, $paramDef, $dict))
         {
             return false;
         }
@@ -276,48 +263,39 @@ function GetParameterValues($configObject, $dataSource, &$dict, &$error)
     return true;
 }
 
-function ParseResultProperty($configObject, $parentObj, &$dataGroup, &$nameInGroup, &$error)
+function ParseResultProperty($configObject, $parentObj, &$dataGroup, &$nameInGroup)
 {
-    if (isset($parentObj->Result))
+    if (!isset($parentObj->Result))
     {
-        if (isset($parentObj->Result->DataGroup) &&
-            $parentObj->Result->DataGroup !== "")
-        {
-            $dataGroup = $parentObj->Result->DataGroup;
-            if (isset($parentObj->Result->NameInGroup) &&
-                $parentObj->Result->NameInGroup !== "")
-            {
-                $nameInGroup = $parentObj->Result->DataGroup;
-                if (in_array($nameInGroup, $configObject->DataGroups))
-                {
-                    return true;
-                }
-                else {
-                    $error = "No group with the name {$nameInGroup}";
-                    return false;
-                }
-            }
-            else
-            {
-                $error = "Name to save result to in group not specified";
-                return false;
-            }
-        }
-        else
-        {
-            $error = "Group name of result is not specified";
-            return false;
-        }
+        throw new LinkException(500, "Data source result not configured");
     }
-    else {
-        $error = "Data source result not configured";
-        return false;
+
+    if (!isset($parentObj->Result->DataGroup) ||
+        $parentObj->Result->DataGroup === "")
+    {
+        throw new LinkException(500, "Group name of result is not specified");
     }
+
+    if (!isset($parentObj->Result->NameInGroup) ||
+        $parentObj->Result->NameInGroup === "")
+    {
+        throw new LinkException(500, "Name to save result to in group not specified");
+    }
+
+    $dataGroup = $parentObj->Result->DataGroup;
+    $nameInGroup = $parentObj->Result->DataGroup;
+
+    if (!in_array($nameInGroup, $configObject->DataGroups))
+    {
+        throw new LinkException(500, "No group with the name {$nameInGroup}");
+    }
+
+    return true;
 }
 
-function SetResultValue($configObject, $dataSource, $result, &$error)
+function SetResultValue($configObject, $dataSource, $result)
 {
-    if (ParseResultProperty($configObject, $dataSource, $dataGroup, $nameInGroup, $error))
+    if (ParseResultProperty($configObject, $dataSource, $dataGroup, $nameInGroup))
     {
         $GLOBALS["DATAGROUPS"][$dataGroup][$nameInGroup] = $result;
         return true;
@@ -328,9 +306,9 @@ function SetResultValue($configObject, $dataSource, $result, &$error)
     }
 }
 
-function CreateResultObject($configObject, &$resultObj, &$error)
+function CreateResultObject($configObject, &$resultObj)
 {
-    if (ParseResultProperty($configObject, $configObject, $dataGroup, $nameInGroup, $error))
+    if (ParseResultProperty($configObject, $configObject, $dataGroup, $nameInGroup))
     {
         $obj = $GLOBALS["DATAGROUPS"][$dataGroup][$nameInGroup];
         $resultObj = ReturnResponse(200, $obj);
@@ -347,86 +325,62 @@ function Process($configObject)
 
     foreach ($configObject->DataSources as $dataSource)
     {
-        if (!GetParameterValues($configObject, $dataSource, $parameterDict, $error))
+        if (GetParameterValues($configObject, $dataSource, $parameterDict))
         {
-            $obj = ["Error" => $error];
-            $responseObject = ReturnResponse(500, $obj);
-            return $responseObject;
-        }
+            if (strcasecmp($dataSource->Type, "Database") === 0)
+            {
+                $datasourceObj = DatabaseQuery($dataSource->Properties, $parameterDict);
+            }
+            else if (strcasecmp($dataSource->Type, "Script") === 0)
+            {
+                $datasourceObj = ExecScript($dataSource->Properties, $parameterDict);
+            }
+            else
+            {
+                throw new LinkException(500, "Unsupported data source");
+            }
 
-        if (strcasecmp($dataSource->Type, "Database") === 0)
-        {
-            $datasourceObj = DatabaseQuery($dataSource->Properties, $parameterDict);
-        }
-        else if (strcasecmp($dataSource->Type, "Script") === 0)
-        {
-            $datasourceObj = ExecScript($dataSource->Properties, $parameterDict);
-        }
-        else
-        {
-            $obj = ["Error" => "Unsupported data source"];
-            $responseObject = ReturnResponse(500, $obj);
-            break;
-        }
-
-        if (!SetResultValue($configObject, $dataSource, $datasourceObj, $error))
-        {
-            $obj = ["Error" => $error];
-            $responseObject = ReturnResponse(500, $obj);
-            return $responseObject;
+            SetResultValue($configObject, $dataSource, $datasourceObj);
         }
     }
 
-    if (!CreateResultObject($configObject, $responseObject, $error))
-    {
-        $obj = ["Error" => $error];
-        $responseObject = ReturnResponse(500, $obj);
-    }
-
+    CreateResultObject($configObject, $responseObject);
     return $responseObject;
 }
 
 function Dispatch($configObject)
 {
-    $error = "";
-    if (PrerequisitsMet($configObject, $error))
+    if (PrerequisitsMet($configObject))
     {
         SetUpDataGroups($configObject);
         return Process($configObject);
     }
-    else
-    {
-        $obj = ["Error" => $error];
-        return ReturnResponse(400, $obj);
-    }
 }
 
-function PrerequisitsMet($configObject, &$error)
+function PrerequisitsMet($configObject)
 {
-    $error = "";
-
     if (!HasSecurityAccess($configObject))
     {
-        $error = "Unauthorized";
+        throw new LinkException(400, "Unauthorized");
     }
     else if (!HasDataSources($configObject))
     {
-        $error = "No data sources";
+        throw new LinkException(500, "No data sources");
     }
     else if (!HasValidHttpMethod($configObject))
     {
-        $error = "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method";
+        throw new LinkException(400, "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method");
     }
     else if (!HasRequiredRequestParameters($configObject))
     {
-        $error = "Missing required request parameters";
+        throw new LinkException(400, "Missing required request parameters");
     }
     else if (!HasRequiredQueryParameters($configObject))
     {
-        $error = "Missing required query string parameters";
+        throw new LinkException(400, "Missing required query string parameters");
     }
 
-    return ($error === "");
+    return true;
 }
 
 function SetUpDataGroups($configObject)
@@ -449,19 +403,20 @@ function WriteResponse($response)
 
 function Main()
 {
-    $apiPoint = $_GET["a"];
+    $apiPoint = $_GET["_a_"];
     $configObject = "";
     $error = "";
 
     $response = array();
 
-    if (GetApiPointConfig($apiPoint, $configObject, $error))
+    try
     {
+        GetApiPointConfig($apiPoint, $configObject);
         $response = Dispatch($configObject);
     }
-    else
+    catch (LinkException $e)
     {
-        $response = ReturnResponse(404, ["Error" => $error]);
+        $response = ReturnResponse($e->getStatusCode(), ["Error" => $e->getMessage()]);
     }
 
     WriteResponse($response);
