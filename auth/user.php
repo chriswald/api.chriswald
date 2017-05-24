@@ -73,6 +73,11 @@ class User
         }
     }
 
+    function IsLoggedIn()
+    {
+        return !$this->session->TokenIsExpired();
+    }
+
     private function _FindMatchingEmail($email)
     {
         $query = "SELECT * FROM User WHERE User.Email = ? and User.Active = 1";
