@@ -60,14 +60,46 @@ function ReturnResponse($statusCode, $obj)
 
 function HasSecurityAccess($configObject)
 {
+    // Make sure that the configuration specifies security
+    // requirements.
     if (!isset($configObject->Security)
         || !isset($configObject->Security->RequiredPoints))
+    {
+        throw new LinkException(500, "The configuration does not specify security requirements");
+    }
+
+    if (!is_string($configObject->Security->RequiredPoints) &&
+        !is_array($configObject->Security->RequiredPoints))
+    {
+        throw new LinkException(500, "The required security points are not properly specified");
+    }
+
+    // If the required points is an array but has no points, access
+    // is unrestricted.
+    if (is_array($configObject->Security->RequiredPoints) &&
+        count($configObject->Security->RequiredPoints) === 0)
     {
         return true;
     }
 
+    // Create the user with the Session Token and check to see if
+    // they're logged in.
     $user = new User(GetSessionToken());
+    if (!$user->IsLoggedIn())
+    {
+        return false;
+    }
 
+    // If the required points is defined as "Any", any logged in user
+    // can access the endpoint.
+    if (is_string($configObject->Security->RequiredPoints) &&
+        strcasecmp($configObject->Security->RequiredPoints, "Any") === 0)
+    {
+        return true;
+    }
+
+    // Otherwise, compare the user's security points against the list
+    // of required security points.
     foreach ($configObject->Security->RequiredPoints as $point)
     {
         if (!$user->GetSecurity()->HasSecurityPoint($point))
