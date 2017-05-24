@@ -348,6 +348,10 @@ function Process($configObject)
     return $responseObject;
 }
 
+/*
+ * Ensures that the API endpoint's prerequsites are met, then
+ * processes the request.
+ */
 function Dispatch($configObject)
 {
     if (PrerequisitsMet($configObject))
@@ -357,6 +361,10 @@ function Dispatch($configObject)
     }
 }
 
+/*
+ * Ensures that a request meets the basic requirements of the API
+ * endpoint it is trying to access.
+ */
 function PrerequisitsMet($configObject)
 {
     if (!HasSecurityAccess($configObject))
@@ -383,6 +391,10 @@ function PrerequisitsMet($configObject)
     return true;
 }
 
+/*
+ * Initializes storage for each data group specified in the
+ * configuration's DataGroups section.
+ */
 function SetUpDataGroups($configObject)
 {
     if (isset($configObject->DataGroups))
@@ -394,13 +406,33 @@ function SetUpDataGroups($configObject)
     }
 }
 
+/*
+ * Writes the Http status code to the response's header and writes
+ * the response object JSON encoded to the body.
+ */
 function WriteResponse($response)
 {
     http_response_code($response["Status"]);
     header("Content-Type: text/json");
-    echo json_encode($response["Object"]);
+
+    if (isset($response["Object"]) &&
+        $response["Object"] !== null)
+    {
+        echo json_encode($response["Object"]);
+    }
 }
 
+/*
+ * Entry point of script's execution. Retrieves an API endpoint
+ * configuration in the form of a relative file path from the _a_ GET
+ * parameter. Attemps to execute the actions described in that
+ * configuration.
+ *
+ * PARAMETERS:
+ *  GET[_a_] - The relative path to a .config.js API endpoint
+ *      configuration. The path is relative to the directory of this
+ *      document.
+ */
 function Main()
 {
     $apiPoint = $_GET["_a_"];
