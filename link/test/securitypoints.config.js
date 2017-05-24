@@ -1,6 +1,6 @@
 {
     "Security": {
-        "RequiredPoints": []
+        "RequiredPoints": "Any"
     },
 
     "DataGroups": [
