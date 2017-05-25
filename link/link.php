@@ -13,7 +13,7 @@ function FileFromCurrentDirectory($path)
         $path = DIRECTORY_SEPARATOR . $path;
     }
 
-    $path = "." . $path . ".config.js";
+    $path = "." . $path . ".config.json";
     return $path;
 }
 
