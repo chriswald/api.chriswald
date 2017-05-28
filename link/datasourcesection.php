@@ -10,11 +10,6 @@ class DataSourceSection extends ApiConfigSection
         return "DataSources";
     }
 
-    private function RequestMethodIsCorrect()
-    {
-        return (strcasecmp($_SERVER["REQUEST_METHOD"], $this->SectionValue) === 0);
-    }
-
     private function ParseForSection($config)
     {
         if (!isset($config->DataSources))
