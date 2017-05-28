@@ -8,6 +8,7 @@ include_once "securitysection.php";
 include_once "httpmethodsection.php";
 include_once "datasourcesection.php";
 include_once "requestparameterssection.php";
+include_once "queryparameterssection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -63,6 +64,14 @@ class ApiLink
         {
             throw new LinkException(500, "Request parameters section is invalid");
         }
+
+        $queryParametersSection = new QueryParametersSection($apiPoint->Config());
+        if ($queryParametersSection->HasSection && !$queryParametersSection->IsValid)
+        {
+            throw new LinkException(500, "Query parameters section is invalid");
+        }
+
+        return true;
     }
 
     private function GetSessionToken()
