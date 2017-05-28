@@ -18,6 +18,13 @@ class ApiLink
 {
     private $_dataGroups;
 
+    private $_securitySection;
+    private $_httpMethodSection;
+    private $_dataSourceSection;
+    private $_requestParametersSection;
+    private $_queryParametersSection;
+    private $_dataGroupsSection;
+
     public function __construct()
     {
         $this->_dataGroups = new DataGroups();
@@ -31,6 +38,9 @@ class ApiLink
             if (PrerequisitsMet($apiPoint))
             {
                 SetUpDataGroups($apiPoint);
+                $response = Process($apiPoint);
+                $httpStatusCode = $response["Status"];
+                $responseObject = $response["Object"];
             }
         }
         catch (LinkException $e)
@@ -42,32 +52,32 @@ class ApiLink
 
     private function PrerequisitsMet(LinkApiPoint $apiPoint)
     {
-        $securitySection = new SecuritySection($apiPoint->Config());
-        if (!$securitySection->ValidateUser(GetSessionToken()))
+        $this->_securitySection = new SecuritySection($apiPoint->Config());
+        if (!$this->_securitySection->ValidateUser(GetSessionToken()))
         {
             throw new LinkException(400, "Unauthorized");
         }
 
-        $httpMethodSection = new HttpMethodSection($apiPoint->Config());
-        if (!$httpMethodSection->RequestMethodIsCorrect())
+        $this->_httpMethodSection = new HttpMethodSection($apiPoint->Config());
+        if (!$this->_httpMethodSection->RequestMethodIsCorrect())
         {
             throw new LinkException(400, "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method");
         }
 
-        $dataSourceSection = new DataSourceSection($apiPoint->Config());
-        if (!$dataSourceSection->HasSection && $dataSourceSection->IsValid)
+        $this->_dataSourceSection = new DataSourceSection($apiPoint->Config());
+        if (!$this->_dataSourceSection->HasSection && $this->_dataSourceSection->IsValid)
         {
             throw new LinkException(500, "Data sources are missing or invalid");
         }
 
-        $requestParametersSection = new RequestParametersSection($apiPoint->Config());
-        if ($requestParametersSection->HasSection && !$requestParametersSection->IsValid)
+        $this->_requestParametersSection = new RequestParametersSection($apiPoint->Config());
+        if ($this->_requestParametersSection->HasSection && !$this->_requestParametersSection->IsValid)
         {
             throw new LinkException(500, "Request parameters section is invalid");
         }
 
-        $queryParametersSection = new QueryParametersSection($apiPoint->Config());
-        if ($queryParametersSection->HasSection && !$queryParametersSection->IsValid)
+        $this->_queryParametersSection = new QueryParametersSection($apiPoint->Config());
+        if ($this->_queryParametersSection->HasSection && !$this->_queryParametersSection->IsValid)
         {
             throw new LinkException(500, "Query parameters section is invalid");
         }
@@ -77,14 +87,19 @@ class ApiLink
 
     private function SetUpDataGroups(LinkApiPoint $apiPoint)
     {
-        $dataGroupsSection = new DataGroupsSection($apiPoint->Config());
-        if ($dataGroupsSection->IsValid)
+        $this->_dataGroupsSection = new DataGroupsSection($apiPoint->Config());
+        if ($this->_dataGroupsSection->IsValid)
         {
-            foreach ($dataGroupsSection->SectionValue as $group)
+            foreach ($this->_dataGroupsSection->SectionValue as $group)
             {
                 $this->_dataGroups->InitializeGroup($group);
             }
         }
+    }
+
+    private function Process(LinkApiPoint $apiPoint)
+    {
+
     }
 
     private function GetSessionToken()
