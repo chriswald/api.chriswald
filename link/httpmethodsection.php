@@ -1,8 +1,6 @@
 <?php
 
 include_once "apiconfigsection.php";
-include_once "linkexception.php";
-include_once "../auth/user.php";
 
 class HttpMethodSection extends ApiConfigSection
 {
