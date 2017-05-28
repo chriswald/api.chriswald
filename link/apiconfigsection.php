@@ -1,16 +1,21 @@
 <?php
 
-interface ApiConfigSection
+abstract class ApiConfigSection
 {
-    public function __construct($linkApiPoint);
+    public $HasSection;
+    public $IsValid;
+    public $SectionValue;
 
-    public function SectionName();
+    public function __construct($linkApiPointConfig)
+    {
+        $this->HasSection = false;
+        $this->IsValid = false;
+        ParseSection($linkApiPointConfig);
+    }
 
-    public function SectionValue();
+    public abstract function SectionName();
 
-    public function ConfigHasSection();
-
-    public function IsValid();
+    protected abstract function ParseSection($config);
 }
 
 ?>

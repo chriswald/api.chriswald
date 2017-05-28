@@ -4,45 +4,19 @@ include_once "apiconfigsection.php";
 include_once "linkexception.php";
 include_once "../auth/user.php";
 
-class SecuritySection implements ApiConfigSection
+class SecuritySection extends ApiConfigSection
 {
-    private $_hasSection;
-    private $_isValid;
-    private $_obj;
-
-    public function __construct($linkApiPointConfig)
-    {
-        $_hasSection = false;
-        $_isValid = true;
-        ParseForSection($linkApiPointConfig);
-    }
-
     public function SectionName()
     {
         return "Security";
-    }
-
-    public function SectionValue()
-    {
-        return $_obj;
-    }
-
-    public function ConfigHasSection()
-    {
-        return $_hasSection;
-    }
-
-    public function IsValid()
-    {
-        return $_isValid;
     }
 
     public function ValidateUser($sessionToken)
     {
         // If the required points is an array but has no points, access
         // is unrestricted.
-        if (is_array($_obj->RequiredPoints) &&
-            count($_obj->RequiredPoints) === 0)
+        if (is_array($this->SectionValue->RequiredPoints) &&
+            count($this->SectionValue->RequiredPoints) === 0)
         {
             return true;
         }
@@ -55,15 +29,15 @@ class SecuritySection implements ApiConfigSection
 
         // If the required points is defined as "Any", any logged in user
         // can access the endpoint.
-        if (is_string($_obj->RequiredPoints) &&
-            strcasecmp($_obj->RequiredPoints, "Any") === 0)
+        if (is_string($this->SectionValue->RequiredPoints) &&
+            strcasecmp($this->SectionValue->RequiredPoints, "Any") === 0)
         {
             return true;
         }
 
         // Otherwise, compare the user's security points against the list
         // of required security points.
-        foreach ($_obj->RequiredPoints as $point)
+        foreach ($this->SectionValue->RequiredPoints as $point)
         {
             if (!$user->GetSecurity()->HasSecurityPoint($point))
             {
@@ -74,7 +48,7 @@ class SecuritySection implements ApiConfigSection
         return true;
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         // Make sure that the configuration specifies security
         // requirements.
@@ -85,7 +59,7 @@ class SecuritySection implements ApiConfigSection
         }
         else
         {
-            $_hasSection = true;
+            $this->HasSection = true;
         }
 
         // Make sure the required points is of the correct type.
@@ -96,10 +70,10 @@ class SecuritySection implements ApiConfigSection
         }
         else
         {
-            $_isValid = true;
+            $this->IsValid = true;
         }
 
-        $_obj = $config->Security;
+        $this->SectionValue = $config->Security;
     }
 }
 
