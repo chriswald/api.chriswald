@@ -24,7 +24,7 @@ class SecuritySection implements ApiConfigSection
 
     public function SectionValue()
     {
-        return $obj;
+        return $_obj;
     }
 
     public function ConfigHasSection()
