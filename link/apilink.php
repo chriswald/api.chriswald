@@ -6,6 +6,7 @@ include_once "datagroups.php";
 
 include_once "securitysection.php";
 include_once "httpmethodsection.php";
+include_once "datasourcesection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -48,6 +49,12 @@ class ApiLink
         if (!$httpMethodSection->RequestMethodIsCorrect())
         {
             throw new LinkException(400, "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method");
+        }
+
+        $dataSourceSection = new DataSourceSection($apiPoint->Config());
+        if (!$dataSourceSection->HasSection && $dataSourceSection->IsValid)
+        {
+            throw new LinkException(500, "Data sources are missing or invalid");
         }
     }
 
