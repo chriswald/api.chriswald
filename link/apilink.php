@@ -7,6 +7,7 @@ include_once "datagroups.php";
 include_once "securitysection.php";
 include_once "httpmethodsection.php";
 include_once "datasourcesection.php";
+include_once "requestparameterssection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -55,6 +56,12 @@ class ApiLink
         if (!$dataSourceSection->HasSection && $dataSourceSection->IsValid)
         {
             throw new LinkException(500, "Data sources are missing or invalid");
+        }
+
+        $requestParametersSection = new RequestParametersSection($apiPoint->Config());
+        if ($requestParametersSection->HasSection && !$requestParametersSection->IsValid)
+        {
+            throw new LinkException(500, "Request parameters section is invalid");
         }
     }
 
