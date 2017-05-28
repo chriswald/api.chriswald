@@ -10,6 +10,7 @@ include_once "datasourcesection.php";
 include_once "requestparameterssection.php";
 include_once "queryparameterssection.php";
 include_once "datagroupssection.php";
+include_once "resultsection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -112,7 +113,26 @@ class ApiLink
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
     {
-        
+        $resultSection = new ResultSection($apiPoint);
+        if ($resultSection->IsValid && $resultSection->RequiredGroupExists($this->_dataGroupSection))
+        {
+            $dataGroup = $resultSection->SectionValue->DataGroup;
+            $nameInGroup = $resultSection->SectionValue->NameInGroup;
+            $obj = $this->_dataGroups->GetValue($dataGroup, $nameInGroup);
+            $responseObject = ReturnResponse(200, $obj);
+        }
+        else
+        {
+            throw new LinkException(500, "The specified result data group does not exist");
+        }
+    }
+
+    private function ReturnResponse($httpStatus, $object)
+    {
+        return [
+            "Status" => $httpStatus,
+            "Object" => $object
+        ];
     }
 
     private function GetSessionToken()
