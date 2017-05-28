@@ -9,6 +9,7 @@ include_once "httpmethodsection.php";
 include_once "datasourcesection.php";
 include_once "requestparameterssection.php";
 include_once "queryparameterssection.php";
+include_once "datagroupssection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -76,9 +77,10 @@ class ApiLink
 
     private function SetUpDataGroups(LinkApiPoint $apiPoint)
     {
-        if (isset($apiPoint->Config()->DataGroups))
+        $dataGroupsSection = new DataGroupsSection($apiPoint->Config());
+        if ($dataGroupsSection->IsValid)
         {
-            foreach ($apiPoint->Config()->DataGroups as $group)
+            foreach ($dataGroupsSection->SectionValue as $group)
             {
                 $this->_dataGroups->InitializeGroup($group);
             }
