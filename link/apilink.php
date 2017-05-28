@@ -104,11 +104,24 @@ class ApiLink
 
         foreach ($_dataSourceSection->SectionValue as $dataSource)
         {
-
+            if (GetParameterValues($apiPoint, $dataSource, $parameterDict))
+            {
+                
+            }
         }
 
         CreateResultObject($apiPoint, $responseObject);
         return $responseObject;
+    }
+
+    private function GetParameterValues(LinkApiPoint $apiPoint, $dataSource, &$dict)
+    {
+        $parametersSection = new ParameterListSection($dataSource);
+        
+        foreach ($parametersSection->SectionValue as $paramDef)
+        {
+            
+        }
     }
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
