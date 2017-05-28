@@ -29,7 +29,7 @@ class ApiLink
             $apiPoint = new LinkApiPoint($apiPoint);
             if (PrerequisitsMet($apiPoint))
             {
-
+                SetUpDataGroups($apiPoint);
             }
         }
         catch (LinkException $e)
@@ -72,6 +72,17 @@ class ApiLink
         }
 
         return true;
+    }
+
+    private function SetUpDataGroups(LinkApiPoint $apiPoint)
+    {
+        if (isset($apiPoint->Config()->DataGroups))
+        {
+            foreach ($apiPoint->Config()->DataGroups as $group)
+            {
+                $this->_dataGroups->InitializeGroup($group);
+            }
+        }
     }
 
     private function GetSessionToken()
