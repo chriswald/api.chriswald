@@ -99,7 +99,20 @@ class ApiLink
 
     private function Process(LinkApiPoint $apiPoint)
     {
+        $datasourceObj = [];
 
+        foreach ($_dataSourceSection->SectionValue as $dataSource)
+        {
+
+        }
+
+        CreateResultObject($apiPoint, $responseObject);
+        return $responseObject;
+    }
+
+    private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
+    {
+        
     }
 
     private function GetSessionToken()
