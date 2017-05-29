@@ -181,15 +181,16 @@ function DatabaseQuery($dbProps, $parameters)
 
     $queryParams = array();
 
+    $pdo = CreateDBConnection($dbName);
+
     if (isset($parameters))
     {
         foreach ($parameters as $param)
         {
-            array_push($queryParams, mysql_escape_string($param));
+            array_push($queryParams, $pdo->quote($param));
         }
     }
 
-    $pdo = CreateDBConnection($dbName);
     $statement = $pdo->prepare($query);
     $statement->execute($queryParams);
 
