@@ -10,7 +10,7 @@ class DataGroupsSection extends ApiConfigSection
         return "DataGroups";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (isset($config->QueryParameters))
         {

@@ -10,7 +10,7 @@ class ParameterListSection extends ApiConfigSection
         return "Parameters";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (!isset($config->Parameters))
         {

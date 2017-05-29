@@ -10,7 +10,7 @@ class DataSourceSection extends ApiConfigSection
         return "DataSources";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (!isset($config->DataSources))
         {

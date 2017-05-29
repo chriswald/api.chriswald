@@ -14,7 +14,7 @@ class HttpMethodSection extends ApiConfigSection
         return (strcasecmp($_SERVER["REQUEST_METHOD"], $this->SectionValue) === 0);
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (!isset($config->HttpMethod))
         {

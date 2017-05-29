@@ -2,7 +2,7 @@
 
 include_once "apiconfigsection.php";
 include_once "linkexception.php";
-include_once "datagroupsection.php";
+include_once "datagroupssection.php";
 
 class ResultSection extends ApiConfigSection
 {
@@ -11,7 +11,7 @@ class ResultSection extends ApiConfigSection
         return "Result";
     }
 
-    public function RequiredGroupExists(DataGroupSection $section)
+    public function RequiredGroupExists(DataGroupsSection $section)
     {
         foreach ($section->SectionValue as $group)
         {
@@ -24,7 +24,7 @@ class ResultSection extends ApiConfigSection
         return false;
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (!isset($config->Result))
         {

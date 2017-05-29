@@ -10,7 +10,7 @@ class QueryParametersSection extends ApiConfigSection
         return "QueryParameters";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (isset($config->QueryParameters))
         {

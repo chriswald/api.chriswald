@@ -10,7 +10,7 @@ class ParameterSection extends ApiConfigSection
         return "Parameter";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         
     }

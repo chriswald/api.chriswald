@@ -10,7 +10,7 @@ class RequestParametersSection extends ApiConfigSection
         return "RequestParameters";
     }
 
-    private function ParseForSection($config)
+    protected function ParseSection($config)
     {
         if (isset($config->RequestParameters))
         {
