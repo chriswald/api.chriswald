@@ -4,9 +4,9 @@ class LinkApiPoint
 {
     private $_configObject;
 
-    public function __construct(string $apiPoint)
+    public function __construct( $apiPoint)
     {
-        GetApiPointConfig($apiPoint, $_configObject);
+        $this->GetApiPointConfig($apiPoint, $_configObject);
     }
 
     public function Config()
@@ -14,23 +14,23 @@ class LinkApiPoint
         return $_configObject;
     }
 
-    private function GetApiPointConfig(string $apiPoint, &$configObject)
+    private function GetApiPointConfig($apiPoint, &$configObject)
     {
-        $configFile = FileFromCurrentDirectory($apiPoint);
+        $configFile = $this->FileFromCurrentDirectory($apiPoint);
 
         if (!file_exists($configFile))
         {
             throw new LinkException(404, "Cannot find configuration file");
         }
 
-        if (!ParseConfigFromFile($configFile, $configObject) ||
+        if (!$this->ParseConfigFromFile($configFile, $configObject) ||
             $configObject === null)
         {
             throw new LinkException(404, "Failed to parse configuration file");
         }
     }
 
-    private function FileFromCurrentDirectory(string $path)
+    private function FileFromCurrentDirectory($path)
     {
         if (substr($path, 0, 1) !== DIRECTORY_SEPARATOR)
         {
@@ -41,7 +41,7 @@ class LinkApiPoint
         return $path;
     }
 
-    function ParseConfigFromFile(string $configFile, &$configObject)
+    function ParseConfigFromFile($configFile, &$configObject)
     {
         $configData = file_get_contents($configFile);
         try {
