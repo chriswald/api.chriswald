@@ -85,7 +85,7 @@ class User
         $pdo = CreateDBConnection("useraccess");
         $statement = $pdo->prepare($query);
         $statement->execute(array(
-            $pdo->quote($email)
+            mysql_escape_string($email)
         ));
         
         if ($statement->rowCount() === 0)
