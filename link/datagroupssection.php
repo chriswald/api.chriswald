@@ -12,10 +12,10 @@ class DataGroupsSection extends ApiConfigSection
 
     protected function ParseSection($config)
     {
-        if (isset($config->QueryParameters))
+        if (isset($config->DataGroups))
         {
             $this->HasSection = true;
-            $this->SectionValue = $config->QueryParameters;
+            $this->SectionValue = $config->DataGroups;
             
             if (is_array($this->SectionValue))
             {
