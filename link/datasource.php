@@ -59,8 +59,6 @@ class DataSource extends ApiConfigSection
         $statement = $pdo->prepare($query);
         $statement->execute($queryParams);
 
-        print_r($statement);
-
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -148,8 +146,8 @@ class DataSource extends ApiConfigSection
             throw new LinkException(500, "Script file not specified");
         }
 
-        if (!isset($props->EntryPoint) ||
-            $props->EntryPoint === "")
+        if (!isset($props->Entrypoint) ||
+            $props->Entrypoint === "")
         {
             throw new LinkException(500, "Script entry point not specified");
         }
