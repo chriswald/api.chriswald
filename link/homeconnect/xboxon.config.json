@@ -42,6 +42,7 @@
 
     "Result": {
         "DataGroup": "Result",
-        "NameInGroup": "ScriptResult"
+        "NameInGroup": "ScriptResult",
+        "ContentType": "application/json"
     }
 }

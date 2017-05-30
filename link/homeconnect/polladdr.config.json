@@ -36,6 +36,7 @@
 
     "Result": {
         "DataGroup": "Result",
-        "NameInGroup": "QueryResult"
+        "NameInGroup": "QueryResult",
+        "ContentType": "application/json"
     }
 }
