@@ -13,6 +13,7 @@ include_once "datagroupssection.php";
 include_once "resultsection.php";
 include_once "parameterlistsection.php";
 include_once "parametersection.php";
+include_once "datasource.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -102,18 +103,21 @@ class ApiLink
 
     private function Process(LinkApiPoint $apiPoint)
     {
-        $datasourceObj = [];
+        $dataSourceResult = [];
 
-        foreach ($this->_dataSourceSection->SectionValue as $dataSource)
+        foreach ($this->_dataSourceSection->SectionValue as $source)
         {
-            if ($this->GetParameterValues($dataSource, $parameterDict))
+            if ($this->GetParameterValues($source, $parameterDict))
             {
+                $dataSource = new DataSource($source);
+                $dataSourceResult = $dataSource->Execute($parameterDict);
                 
+                $this->SetResultValue($source, $dataSourceResult);
             }
         }
 
         $this->CreateResultObject($apiPoint, $responseObject);
-        $responseObject = $this->ReturnResponse(201, "Foo");
+        //$responseObject = $this->ReturnResponse(201, "Foo");
         return $responseObject;
     }
 
@@ -187,6 +191,11 @@ class ApiLink
         }
 
         return true;
+    }
+
+    private function SetResultValue($dataSource, $dataSourceResult)
+    {
+
     }
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
