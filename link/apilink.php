@@ -34,7 +34,7 @@ class ApiLink
         $this->_dataGroups = new DataGroups();
     }
 
-    public function ExecuteConfig($apiPoint, &$httpStatusCode, &$responseObject)
+    public function ExecuteConfig($apiPoint, &$httpStatusCode, &$responseContentType, &$responseObject)
     {
         try
         {
@@ -44,13 +44,15 @@ class ApiLink
                 $this->SetUpDataGroups($apiPoint);
                 $response = $this->Process($apiPoint);
                 $httpStatusCode = $response["Status"];
+                $responseContentType = $response["ContentType"];
                 $responseObject = $response["Object"];
             }
         }
         catch (LinkException $e)
         {
             $httpStatusCode = $e->getStatusCode();
-            $responseObject = ["Error" => $e->getMessage()];
+            $responseContentType = "application/json";
+            $responseObject = json_encode(["Error" => $e->getMessage()]);
         }
     }
 
@@ -111,7 +113,7 @@ class ApiLink
             {
                 $dataSource = new DataSource($source);
                 $dataSourceResult = $dataSource->Execute($parameterDict);
-                
+
                 $this->SetResultValue($source, $dataSourceResult);
             }
         }
@@ -172,7 +174,7 @@ class ApiLink
                 $grpName = $parameterSection->SectionValue->GroupName;
                 if (in_array($grpName, $this->_dataGroupsSection->SectionValue))
                 {
-                    $destDict[$destName] = $GLOBALS["DATAGROUPS"][$grpName][$srcName];
+                    $destDict[$destName] = $this->_dataGroups->GetValue($grpName, $srcName);
                 }
                 else 
                 {
@@ -211,7 +213,10 @@ class ApiLink
             $dataGroup = $resultSection->SectionValue->DataGroup;
             $nameInGroup = $resultSection->SectionValue->NameInGroup;
             $obj = $this->_dataGroups->GetValue($dataGroup, $nameInGroup);
-            $responseObject = $this->ReturnResponse(200, $obj);
+
+            $obj = $this->HandleContentType($resultSection, $obj, $ctype);
+
+            $responseObject = $this->ReturnResponse(200, $ctype, $obj);
         }
         else
         {
@@ -219,10 +224,33 @@ class ApiLink
         }
     }
 
-    private function ReturnResponse($httpStatus, $object)
+    private function HandleContentType(ResultSection $resultSection, $object, &$ctype)
+    {
+        if (isset($resultSection->SectionValue->ContentType))
+        {
+            $ctype = $resultSection->SectionValue->ContentType;
+
+            if (strcasecmp($ctype, "application/json") === 0)
+            {
+                return json_encode($object);
+            }
+            else
+            {
+                return $object;
+            }
+        }
+        else
+        {
+            $ctype = "text/plain";
+            return $object;
+        }
+    }
+
+    private function ReturnResponse($httpStatus, $contentType, $object)
     {
         return [
             "Status" => $httpStatus,
+            "ContentType" => $contentType,
             "Object" => $object
         ];
     }
