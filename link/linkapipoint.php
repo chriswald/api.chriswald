@@ -4,14 +4,14 @@ class LinkApiPoint
 {
     private $_configObject;
 
-    public function __construct( $apiPoint)
+    public function __construct($apiPoint)
     {
-        $this->GetApiPointConfig($apiPoint, $_configObject);
+        $this->GetApiPointConfig($apiPoint, $this->_configObject);
     }
 
     public function Config()
     {
-        return $_configObject;
+        return $this->_configObject;
     }
 
     private function GetApiPointConfig($apiPoint, &$configObject)
