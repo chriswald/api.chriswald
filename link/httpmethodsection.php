@@ -9,7 +9,7 @@ class HttpMethodSection extends ApiConfigSection
         return "HttpMethod";
     }
 
-    private function RequestMethodIsCorrect()
+    public function RequestMethodIsCorrect()
     {
         return (strcasecmp($_SERVER["REQUEST_METHOD"], $this->SectionValue) === 0);
     }
