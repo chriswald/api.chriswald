@@ -102,7 +102,7 @@ class ApiLink
     {
         $datasourceObj = [];
 
-        foreach ($_dataSourceSection->SectionValue as $dataSource)
+        foreach ($this->_dataSourceSection->SectionValue as $dataSource)
         {
             /*if (GetParameterValues($apiPoint, $dataSource, $parameterDict))
             {
