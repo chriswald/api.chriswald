@@ -10,7 +10,7 @@ abstract class ApiConfigSection
     {
         $this->HasSection = false;
         $this->IsValid = false;
-        ParseSection($linkApiPointConfig);
+        $this->ParseSection($linkApiPointConfig);
     }
 
     public abstract function SectionName();

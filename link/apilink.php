@@ -31,15 +31,15 @@ class ApiLink
         $this->_dataGroups = new DataGroups();
     }
 
-    public function ExecuteConfig(string $apiPoint, &$httpStatusCode, &$responseObject)
+    public function ExecuteConfig($apiPoint, &$httpStatusCode, &$responseObject)
     {
         try
         {
             $apiPoint = new LinkApiPoint($apiPoint);
-            if (PrerequisitsMet($apiPoint))
+            if ($this->PrerequisitsMet($apiPoint))
             {
-                SetUpDataGroups($apiPoint);
-                $response = Process($apiPoint);
+                $this->SetUpDataGroups($apiPoint);
+                $response = $this->Process($apiPoint);
                 $httpStatusCode = $response["Status"];
                 $responseObject = $response["Object"];
             }
@@ -54,7 +54,7 @@ class ApiLink
     private function PrerequisitsMet(LinkApiPoint $apiPoint)
     {
         $this->_securitySection = new SecuritySection($apiPoint->Config());
-        if (!$this->_securitySection->ValidateUser(GetSessionToken()))
+        if (!$this->_securitySection->ValidateUser($this->GetSessionToken()))
         {
             throw new LinkException(400, "Unauthorized");
         }
@@ -104,13 +104,15 @@ class ApiLink
 
         foreach ($_dataSourceSection->SectionValue as $dataSource)
         {
-            if (GetParameterValues($apiPoint, $dataSource, $parameterDict))
+            /*if (GetParameterValues($apiPoint, $dataSource, $parameterDict))
             {
                 
-            }
+            }*/
+
         }
 
-        CreateResultObject($apiPoint, $responseObject);
+        $this->CreateResultObject($apiPoint, $responseObject);
+        $responseObject = $this->ReturnResponse(201, "Foo");
         return $responseObject;
     }
 
@@ -132,7 +134,7 @@ class ApiLink
             $dataGroup = $resultSection->SectionValue->DataGroup;
             $nameInGroup = $resultSection->SectionValue->NameInGroup;
             $obj = $this->_dataGroups->GetValue($dataGroup, $nameInGroup);
-            $responseObject = ReturnResponse(200, $obj);
+            $responseObject = $this->ReturnResponse(200, $obj);
         }
         else
         {
