@@ -52,7 +52,7 @@ class DataSource extends ApiConfigSection
         {
             foreach ($parameterDict as $param)
             {
-                array_push($queryParams, $pdo->quote($param));
+                array_push($queryParams, mysql_escape_string($param));
             }
         }
         
