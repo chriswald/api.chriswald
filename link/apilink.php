@@ -106,11 +106,10 @@ class ApiLink
 
         foreach ($this->_dataSourceSection->SectionValue as $dataSource)
         {
-            if ($this->GetParameterValues($apiPoint, $dataSource, $parameterDict))
+            if ($this->GetParameterValues($dataSource, $parameterDict))
             {
                 
             }
-
         }
 
         $this->CreateResultObject($apiPoint, $responseObject);
@@ -118,14 +117,76 @@ class ApiLink
         return $responseObject;
     }
 
-    private function GetParameterValues(LinkApiPoint $apiPoint, $dataSource, &$dict)
+    private function GetParameterValues($dataSource, &$dict)
     {
         $parametersSection = new ParameterListSection($dataSource);
-        
         foreach ($parametersSection->SectionValue as $paramDef)
         {
-            
+            if (!$this->GetSingleParameterValue($paramDef, $dict))
+            {
+                return false;
+            }
         }
+
+        return true;
+    }
+
+    private function GetSingleParameterValue($paramDef, &$destDict)
+    {
+        $parameterSection = new ParameterSection($paramDef);
+
+        $source = $parameterSection->SectionValue->Source;
+        $srcName = $parameterSection->SectionValue->SourceParameterName;
+        $destName = $parameterSection->SectionValue->DestinationParameterName;
+
+        if (strcasecmp($source, "RequestParameters") === 0)
+        {
+            if (in_array($srcName, $this->_requestParametersSection->SectionValue))
+            {
+                $destDict[$destName] = $_POST[$srcName];
+            }
+            else 
+            {
+                throw new LinkException(500, "RequestParameters does not have the parameter {$srcName}");
+            }
+        }
+        else if (strcasecmp($source, "QueryParameters") === 0)
+        {
+            if (in_array($srcName, $this->_queryParametersSection->SectionValue))
+            {
+                $destDict[$destName] = $_GET[$srcName];
+            }
+            else 
+            {
+                throw new LinkException(500, "QueryParameters does not have the parameter {$srcName}");
+            }
+        }
+        else if (strcasecmp($source, "DataGroups") === 0)
+        {
+            if (isset($parameterSection->SectionValue->GroupName) && 
+                $parameterSection->SectionValue->GroupName !== "")
+            {
+                $grpName = $parameterSection->SectionValue->GroupName;
+                if (in_array($grpName, $this->_dataGroupsSection->SectionValue))
+                {
+                    $destDict[$destName] = $GLOBALS["DATAGROUPS"][$grpName][$srcName];
+                }
+                else 
+                {
+                    throw new LinkException(500, "No group with the name {$grpName}");
+                }
+            }
+            else
+            {
+                throw new LinkException(500, "Group name of parameter is not specified");
+            }
+        }
+        else
+        {
+            throw new LinkException(500, "Parameter source {$source} is not a supported source");
+        }
+
+        return true;
     }
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
