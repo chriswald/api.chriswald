@@ -9,7 +9,7 @@ class DataGroups
         $this->_dataGroups[$groupName] = [];
     }
 
-    public function AddValue($groupName, $valueName, $value)
+    public function SetValue($groupName, $valueName, $value)
     {
         $this->_dataGroups[$groupName][$valueName] = $value;
     }

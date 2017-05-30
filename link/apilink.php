@@ -117,7 +117,6 @@ class ApiLink
         }
 
         $this->CreateResultObject($apiPoint, $responseObject);
-        //$responseObject = $this->ReturnResponse(201, "Foo");
         return $responseObject;
     }
 
@@ -195,7 +194,13 @@ class ApiLink
 
     private function SetResultValue($dataSource, $dataSourceResult)
     {
-
+        $resultSection = new ResultSection($dataSource);
+        if ($resultSection->IsValid && $resultSection->RequiredGroupExists($this->_dataGroupsSection))
+        {
+            $dataGroup = $resultSection->SectionValue->DataGroup;
+            $nameInGroup = $resultSection->SectionValue->NameInGroup;
+            $this->_dataGroups->SetValue($dataGroup, $nameInGroup, $dataSourceResult);
+        }
     }
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
