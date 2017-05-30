@@ -21,7 +21,7 @@ class SecuritySection extends ApiConfigSection
             return true;
         }
 
-        $user == new User($sessionToken);
+        $user = new User($sessionToken);
         if (!$user->IsLoggedIn())
         {
             return false;
