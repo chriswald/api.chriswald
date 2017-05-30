@@ -11,6 +11,8 @@ include_once "requestparameterssection.php";
 include_once "queryparameterssection.php";
 include_once "datagroupssection.php";
 include_once "resultsection.php";
+include_once "parameterlistsection.php";
+include_once "parametersection.php";
 
 include_once "../auth/createconnection.php";
 include_once "../auth/user.php";
@@ -104,10 +106,10 @@ class ApiLink
 
         foreach ($this->_dataSourceSection->SectionValue as $dataSource)
         {
-            /*if (GetParameterValues($apiPoint, $dataSource, $parameterDict))
+            if ($this->GetParameterValues($apiPoint, $dataSource, $parameterDict))
             {
                 
-            }*/
+            }
 
         }
 
