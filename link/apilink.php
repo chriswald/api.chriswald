@@ -128,8 +128,8 @@ class ApiLink
 
     private function CreateResultObject(LinkApiPoint $apiPoint, &$responseObject)
     {
-        $resultSection = new ResultSection($apiPoint);
-        if ($resultSection->IsValid && $resultSection->RequiredGroupExists($this->_dataGroupSection))
+        $resultSection = new ResultSection($apiPoint->Config());
+        if ($resultSection->IsValid && $resultSection->RequiredGroupExists($this->_dataGroupsSection))
         {
             $dataGroup = $resultSection->SectionValue->DataGroup;
             $nameInGroup = $resultSection->SectionValue->NameInGroup;
