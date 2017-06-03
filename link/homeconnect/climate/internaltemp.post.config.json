@@ -1,0 +1,48 @@
+{
+    "Security": {
+        "RequiredPoints": [6]
+    },
+
+    "HttpMethod": "POST",
+
+    "RequestParameters": [
+        "ID",
+        "Temperature"
+    ],
+
+    "DataGroups": [
+        "Result"
+    ],
+
+    "DataSources": [
+        {
+            "Type": "Script",
+            "Parameters": [
+                {
+                    "Source": "RequestParameters",
+                    "SourceParameterName": "ID",
+                    "DestinationParameterName": "ID"
+                },
+                {
+                    "Source": "RequestParameters",
+                    "SourceParameterName": "Temperature",
+                    "DestinationParameterName": "Temperature"
+                }
+            ],
+            "Properties": {
+                "File": "homeconnect/climate/scripts/setinternaltemp.php",
+                "EntryPoint": "ExecInit"
+            },
+            "Result": {
+                "DataGroup": "Result",
+                "NameInGroup": "ScriptResult"
+            }
+        }
+    ],
+
+    "Result": {
+        "DataGroup": "Result",
+        "NameInGroup": "ScriptResult",
+        "ContentType": "application/json"
+    }
+}

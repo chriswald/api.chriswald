@@ -1,0 +1,16 @@
+{
+    "Security": {
+        "RequiredPoints": [7]
+    },
+
+    "HttpMethod": [
+        {
+            "Method": "GET",
+            "Config": "homeconnect/climate/internaltemp.get"
+        },
+        {
+            "Method": "POST",
+            "Config": "homeconnect/climate/internaltemp.post"
+        }
+    ]
+}
