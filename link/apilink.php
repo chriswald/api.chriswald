@@ -39,13 +39,13 @@ class ApiLink
         try
         {
             $apiPoint = new LinkApiPoint($apiPoint);
-            if ($this->PrerequisitsMet($apiPoint))
+            if ($this->IsRedirectorConfig($apiPoint))
             {
-                $this->SetUpDataGroups($apiPoint);
-                $response = $this->Process($apiPoint);
-                $httpStatusCode = $response["Status"];
-                $responseContentType = $response["ContentType"];
-                $responseObject = $response["Object"];
+                $this->ExecuteRedirectorConfig($apiPoint, $httpStatusCode, $responseContentType, $responseObject);
+            }
+            else
+            {
+                $this->ExecuteDirectConfig($apiPoint, $httpStatusCode, $responseContentType, $responseObject);
             }
         }
         catch (LinkException $e)
@@ -62,12 +62,6 @@ class ApiLink
         if (!$this->_securitySection->ValidateUser($this->GetSessionToken()))
         {
             throw new LinkException(400, "Unauthorized");
-        }
-
-        $this->_httpMethodSection = new HttpMethodSection($apiPoint->Config());
-        if (!$this->_httpMethodSection->RequestMethodIsCorrect())
-        {
-            throw new LinkException(400, "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method");
         }
 
         $this->_dataSourceSection = new DataSourceSection($apiPoint->Config());
@@ -89,6 +83,38 @@ class ApiLink
         }
 
         return true;
+    }
+
+    private function IsRedirectorConfig(LinkApiPoint $apiPoint)
+    {
+        $this->_httpMethodSection = new HttpMethodSection($apiPoint->Config());
+        return $this->_httpMethodSection->IsRedirector;
+    }
+
+    private function ExecuteDirectConfig(LinkApiPoint $apiPoint, &$httpStatusCode, &$responseContentType, &$responseObject)
+    {
+        if ($this->PrerequisitsMet($apiPoint))
+        {
+            if ($this->_httpMethodSection->RequestMethodIsCorrect())
+            {
+                $this->SetUpDataGroups($apiPoint);
+                $response = $this->Process($apiPoint);
+                $httpStatusCode = $response["Status"];
+                $responseContentType = $response["ContentType"];
+                $responseObject = $response["Object"];
+            }
+            else
+            {
+                throw new LinkException(400, "The endpoint does not service the {$_SERVER['REQUEST_METHOD']} method");
+            }
+        }
+    }
+
+    private function ExecuteRedirectorConfig(LinkApiPoint $apiPoint, &$httpStatusCode, &$responseContentType, &$responseObject)
+    {
+        $config = $this->_httpMethodSection->ConfigForHttpMethod($_SERVER["REQUEST_METHOD"]);
+        $subConfig = new ApiLink();
+        $subConfig->ExecuteConfig($config, $httpStatusCode, $responseContentType, $responseObject);
     }
 
     private function SetUpDataGroups(LinkApiPoint $apiPoint)
@@ -257,7 +283,14 @@ class ApiLink
 
     private function GetSessionToken()
     {
-        return $_POST["SessionToken"];
+        if ($_SERVER["REQUEST_METHOD"] === "GET")
+        {
+            return $_GET["SessionToken"];
+        }
+        else
+        {
+            return $_POST["SessionToken"];
+        }
     }
 }
 
