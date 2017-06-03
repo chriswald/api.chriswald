@@ -65,7 +65,7 @@ class DataSource extends ApiConfigSection
     private function ExecScript($parameterDict)
     {
         $filename = $this->SectionValue->Properties->File;
-        $entry = $this->SectionValue->Properties->Entrypoint;
+        $entry = $this->SectionValue->Properties->EntryPoint;
         $serialParams = serialize($parameterDict);
         $executable = "include_once \"$filename\"; return $entry(unserialize('$serialParams'));";
 
