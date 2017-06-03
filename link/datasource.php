@@ -146,8 +146,8 @@ class DataSource extends ApiConfigSection
             throw new LinkException(500, "Script file not specified");
         }
 
-        if (!isset($props->Entrypoint) ||
-            $props->Entrypoint === "")
+        if (!isset($props->EntryPoint) ||
+            $props->EntryPoint === "")
         {
             throw new LinkException(500, "Script entry point not specified");
         }

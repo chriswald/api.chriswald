@@ -31,7 +31,7 @@
             ],
             "Properties": {
                 "File": "homeconnect/scripts/xboxon.php",
-                "Entrypoint": "ExecInit"
+                "EntryPoint": "ExecInit"
             },
             "Result": {
                 "DataGroup": "Result",
