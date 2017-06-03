@@ -37,11 +37,17 @@ class LinkApiPoint
             $path = DIRECTORY_SEPARATOR . $path;
         }
 
-        $path = "." . $path . ".config.json";
+        $path = "." . $path;
+        
+        if (!$this->endsWith($path, ".config.json"))
+        {
+            $path = $path . ".config.json";
+        }
+
         return $path;
     }
 
-    function ParseConfigFromFile($configFile, &$configObject)
+    private function ParseConfigFromFile($configFile, &$configObject)
     {
         $configData = file_get_contents($configFile);
         try {
@@ -50,6 +56,16 @@ class LinkApiPoint
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    private function endsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
     }
 }
 
