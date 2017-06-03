@@ -67,7 +67,8 @@ class DataSource extends ApiConfigSection
         $filename = $this->SectionValue->Properties->File;
         $entry = $this->SectionValue->Properties->EntryPoint;
         $serialParams = serialize($parameterDict);
-        $executable = "include_once \"$filename\"; return $entry(unserialize('$serialParams'));";
+        if ($serialParams !== "") { $params = "unserialize('$serialParams')"; }
+        $executable = "include_once \"$filename\"; return $entry($params);";
 
         $retVal = eval($executable);
         return $retVal;
