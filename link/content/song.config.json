@@ -1,0 +1,24 @@
+{
+    "Security": {
+        "RequiredPoints": [8]
+    },
+
+    "HttpMethod": [
+        {
+            "Method": "GET",
+            "Config": "content/song.get"
+        },
+        {
+            "Method": "POST",
+            "Config": "content/song.post"
+        },
+        {
+            "Method": "PUT",
+            "Config": "content/song.put"
+        },
+        {
+            "Method": "DELETE",
+            "Config": "content/song.delete"
+        }
+    ]
+}

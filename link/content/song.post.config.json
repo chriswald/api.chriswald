@@ -1,0 +1,46 @@
+{
+    "Security": {
+        "RequiredPoints": [8]
+    },
+
+    "HttpMethod": "POST",
+
+    "RequestParameters": [
+        "ID"
+    ],
+
+    "FileParameters": [
+        "track"
+    ],
+
+    "DataGroups": [
+        "Result"
+    ],
+
+    "DataSources": [
+        {
+            "Type": "Script",
+            "Parameters": [
+                {
+                    "Source": "RequestParameters",
+                    "SourceParameterName": "ID",
+                    "DestinationParameterName": "ID"
+                }
+            ],
+            "Properties": {
+                "File": "content/scripts/song/create.php",
+                "EntryPoint": "ExecInit"
+            },
+            "Result": {
+                "DataGroup": "Result",
+                "NameInGroup": "ScriptResult"
+            }
+        }
+    ],
+
+    "Result": {
+        "DataGroup": "Result",
+        "NameInGroup": "ScriptResult",
+        "ContentType": "application/json"
+    }
+}

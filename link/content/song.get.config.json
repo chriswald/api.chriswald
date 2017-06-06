@@ -1,0 +1,42 @@
+{
+    "Security": {
+        "RequiredPoints": [8]
+    },
+
+    "HttpMethod": "GET",
+
+    "QueryParameters": [
+        "ID"
+    ],
+
+    "DataGroups": [
+        "Result"
+    ],
+
+    "DataSources": [
+        {
+            "Type": "Script",
+            "Parameters": [
+                {
+                    "Source": "QueryParameters",
+                    "SourceParameterName": "ID",
+                    "DestinationParameterName": "ID"
+                }
+            ],
+            "Properties": {
+                "File": "content/scripts/song/read.php",
+                "EntryPoint": "ExecInit"
+            },
+            "Result": {
+                "DataGroup": "Result",
+                "NameInGroup": "ScriptResult"
+            }
+        }
+    ],
+
+    "Result": {
+        "DataGroup": "Result",
+        "NameInGroup": "ScriptResult",
+        "ContentType": "application/json"
+    }
+}
