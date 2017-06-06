@@ -27,6 +27,7 @@ class ApiLink
     private $_dataSourceSection;
     private $_requestParametersSection;
     private $_queryParametersSection;
+    private $_fileParametersSection;
     private $_dataGroupsSection;
 
     public function __construct()
@@ -80,6 +81,12 @@ class ApiLink
         if ($this->_queryParametersSection->HasSection && !$this->_queryParametersSection->IsValid)
         {
             throw new LinkException(500, "Query parameters section is invalid");
+        }
+
+        $this->_fileParametersSection = new FileParametersSection($apiPoint->Config());
+        if ($this->_fileParametersSection->HasSection && !$this->_fileParametersSection->IsValid)
+        {
+            throw new LinkException(500, "File parameters section is invalid");
         }
 
         return true;
@@ -190,6 +197,17 @@ class ApiLink
             else 
             {
                 throw new LinkException(500, "QueryParameters does not have the parameter {$srcName}");
+            }
+        }
+        else if (strcasecmp($source, "FileParameters") === 0)
+        {
+            if (in_array($srcName, $this->_fileParametersSection->SectionValue))
+            {
+                $destDict[$destName] = $_FILE[$srcName];
+            }
+            else 
+            {
+                throw new LinkException(500, "FileParameters does not have the parameter {$srcName}");
             }
         }
         else if (strcasecmp($source, "DataGroups") === 0)
