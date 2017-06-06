@@ -23,7 +23,7 @@ class FileParametersSection extends ApiConfigSection
                 
                 foreach ($this->SectionValue as $param)
                 {
-                    if (!isset($_GET[$param]))
+                    if (!isset($_FILES[$param]))
                     {
                         throw new LinkException(400, "Missing file parameter $param");
                     }
