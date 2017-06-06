@@ -9,6 +9,7 @@ include_once "httpmethodsection.php";
 include_once "datasourcesection.php";
 include_once "requestparameterssection.php";
 include_once "queryparameterssection.php";
+include_once "fileparameterssection.php";
 include_once "datagroupssection.php";
 include_once "resultsection.php";
 include_once "parameterlistsection.php";
