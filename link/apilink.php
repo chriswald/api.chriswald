@@ -204,7 +204,7 @@ class ApiLink
         {
             if (in_array($srcName, $this->_fileParametersSection->SectionValue))
             {
-                $destDict[$destName] = $_FILE[$srcName];
+                $destDict[$destName] = $_FILES[$srcName];
             }
             else 
             {
