@@ -30,6 +30,12 @@ class ParameterSection extends ApiConfigSection
             throw new LinkException(500, "No destination parameter name specified");
         }
 
+        if (isset($config->SubNodes) &&
+            !is_array($config->SubNodes))
+        {
+            throw new LinkException(500, "Parameter sub nodes are not correctly specified");
+        }
+
         $this->HasSection = true;
         $this->SectionValue = $config;
         $this->IsValid = true;

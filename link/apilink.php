@@ -178,11 +178,13 @@ class ApiLink
         $srcName = $parameterSection->SectionValue->SourceParameterName;
         $destName = $parameterSection->SectionValue->DestinationParameterName;
 
+        $parameter = [];
+
         if (strcasecmp($source, "RequestParameters") === 0)
         {
             if (in_array($srcName, $this->_requestParametersSection->SectionValue))
             {
-                $destDict[$destName] = $_POST[$srcName];
+                $parameter = $_POST[$srcName];
             }
             else 
             {
@@ -193,7 +195,7 @@ class ApiLink
         {
             if (in_array($srcName, $this->_queryParametersSection->SectionValue))
             {
-                $destDict[$destName] = $_GET[$srcName];
+                $parameter = $_GET[$srcName];
             }
             else 
             {
@@ -204,7 +206,7 @@ class ApiLink
         {
             if (in_array($srcName, $this->_fileParametersSection->SectionValue))
             {
-                $destDict[$destName] = $_FILES[$srcName];
+                $parameter = $_FILES[$srcName];
             }
             else 
             {
@@ -219,7 +221,7 @@ class ApiLink
                 $grpName = $parameterSection->SectionValue->GroupName;
                 if (in_array($grpName, $this->_dataGroupsSection->SectionValue))
                 {
-                    $destDict[$destName] = $this->_dataGroups->GetValue($grpName, $srcName);
+                    $parameter = $this->_dataGroups->GetValue($grpName, $srcName);
                 }
                 else 
                 {
@@ -235,6 +237,24 @@ class ApiLink
         {
             throw new LinkException(500, "Parameter source {$source} is not a supported source");
         }
+
+        if (isset($parameterSection->SectionValue->SubNodes) &&
+            is_array($parameterSection->SectionValue->SubNodes))
+        {
+            foreach ($parameterSection->SectionValue->SubNodes as $subNode)
+            {
+                if (isset($parameter[$subNode]))
+                {
+                    $parameter = $parameter[$subNode];
+                }
+                else
+                {
+                    throw new LinkException(500, "Parameter {$srcName} does not contain sub node {$subNode} in children");
+                }
+            }
+        }
+        
+        $destDict[$destName] = $parameter;
 
         return true;
     }
