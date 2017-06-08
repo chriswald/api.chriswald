@@ -14,6 +14,7 @@ class User
 {
     private $session = null;
     private $security = null;
+    private $id;
 
     function __construct($sessionToken = "")
     {
@@ -21,6 +22,7 @@ class User
         {
             $this->session = new Session($sessionToken);
             $this->security = new Security($this->session);
+            $this->id = $this->GetUserId();
         }
     }
 
@@ -59,6 +61,11 @@ class User
     function GetSecurity()
     {
         return $this->security;
+    }
+
+    function GetID()
+    {
+        return $this->id;
     }
 
     function OtherUserExists($email)
@@ -102,6 +109,12 @@ class User
     {
         $hashPass = HashString($supPassword, $userRow["PasswordSalt"]);
         return ($hashPass["hashedString"] === $userRow["Password"]);
+    }
+
+    private function GetUserId()
+    {
+        $props = $this->_FindMatchingEmail($this->session->GetSessionEmail());
+        return $props["ID"];
     }
 }
 
