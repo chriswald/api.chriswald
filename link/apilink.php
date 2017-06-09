@@ -235,7 +235,12 @@ class ApiLink
         }
         else
         {
-            throw new LinkException(500, "Parameter source {$source} is not a supported source");
+            $err = "Parameter source {$source} is not a supported source";
+            if (strcasecmp($src, "DataGroup") === 0)
+            {
+                $err = "$err. Did you mean DataGroups?";
+            }
+            throw new LinkException(500, $err);
         }
 
         if (isset($parameterSection->SectionValue->SubNodes) &&
