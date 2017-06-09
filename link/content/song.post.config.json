@@ -6,15 +6,17 @@
     "HttpMethod": "POST",
 
     "RequestParameters": [
-        "ID"
+        "SessionToken"
     ],
 
     "FileParameters": [
-        "track"
+        "Track"
     ],
 
     "DataGroups": [
-        "Result"
+        "ScriptResult",
+        "Dummy",
+        "CheckForTrack"
     ],
 
     "DataSources": [
@@ -22,9 +24,14 @@
             "Type": "Script",
             "Parameters": [
                 {
+                    "Source": "FileParameters",
+                    "SourceParameterName": "Track",
+                    "DestinationParameterName": "Track"
+                },
+                {
                     "Source": "RequestParameters",
-                    "SourceParameterName": "ID",
-                    "DestinationParameterName": "ID"
+                    "SourceParameterName": "SessionToken",
+                    "DestinationParameterName": "SessionToken"
                 }
             ],
             "Properties": {
@@ -32,15 +39,15 @@
                 "EntryPoint": "ExecInit"
             },
             "Result": {
-                "DataGroup": "Result",
-                "NameInGroup": "ScriptResult"
+                "DataGroup": "ScriptResult",
+                "NameInGroup": "TrackMetadata"
             }
         }
     ],
 
     "Result": {
-        "DataGroup": "Result",
-        "NameInGroup": "ScriptResult",
+        "DataGroup": "ScriptResult",
+        "NameInGroup": "TrackMetadata",
         "ContentType": "application/json"
     }
 }

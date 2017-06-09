@@ -6,7 +6,8 @@
     "HttpMethod": "GET",
 
     "QueryParameters": [
-        "ID"
+        "TrackHash",
+        "SessionToken"
     ],
 
     "DataGroups": [
@@ -19,8 +20,13 @@
             "Parameters": [
                 {
                     "Source": "QueryParameters",
-                    "SourceParameterName": "ID",
-                    "DestinationParameterName": "ID"
+                    "SourceParameterName": "TrackHash",
+                    "DestinationParameterName": "TrackHash"
+                },
+                {
+                    "Source": "QueryParameters",
+                    "SourceParameterName": "SessionToken",
+                    "DestinationParameterName": "SessionToken"
                 }
             ],
             "Properties": {

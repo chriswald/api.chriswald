@@ -6,11 +6,17 @@
     "HttpMethod": "PUT",
 
     "RequestParameters": [
-        "ID"
+        "SessionToken"
+    ],
+
+    "FileParameters": [
+        "Track"
     ],
 
     "DataGroups": [
-        "Result"
+        "ScriptResult",
+        "Dummy",
+        "CheckForTrack"
     ],
 
     "DataSources": [
@@ -18,25 +24,30 @@
             "Type": "Script",
             "Parameters": [
                 {
+                    "Source": "FileParameters",
+                    "SourceParameterName": "Track",
+                    "DestinationParameterName": "Track"
+                },
+                {
                     "Source": "RequestParameters",
-                    "SourceParameterName": "ID",
-                    "DestinationParameterName": "ID"
+                    "SourceParameterName": "SessionToken",
+                    "DestinationParameterName": "SessionToken"
                 }
             ],
             "Properties": {
-                "File": "content/scripts/song/update.php",
+                "File": "content/scripts/song/create.php",
                 "EntryPoint": "ExecInit"
             },
             "Result": {
-                "DataGroup": "Result",
-                "NameInGroup": "ScriptResult"
+                "DataGroup": "ScriptResult",
+                "NameInGroup": "TrackMetadata"
             }
         }
     ],
 
     "Result": {
-        "DataGroup": "Result",
-        "NameInGroup": "ScriptResult",
+        "DataGroup": "ScriptResult",
+        "NameInGroup": "TrackMetadata",
         "ContentType": "application/json"
     }
 }
