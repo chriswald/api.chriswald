@@ -143,6 +143,7 @@ class ApiLink
 
         foreach ($this->_dataSourceSection->SectionValue as $source)
         {
+            $parameterDict = [];
             if ($this->GetParameterValues($source, $parameterDict))
             {
                 $dataSource = new DataSource($source);
