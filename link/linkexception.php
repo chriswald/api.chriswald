@@ -3,11 +3,18 @@
 class LinkException extends Exception
 {
     protected $httpStatusCode;
+    protected $obj;
 
-    public function __construct($httpStatusCode, $message)
+    public function __construct($httpStatusCode, $obj)
     {
         $this->httpStatusCode = $httpStatusCode;
-        parent::__construct($message);
+        $this->obj = $obj;
+        parent::__construct("");
+    }
+
+    public function getObject()
+    {
+        return $this->obj;
     }
 
     public function getStatusCode()
