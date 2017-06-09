@@ -16,7 +16,7 @@ class User
     private $security = null;
     private $id;
 
-    function __construct($sessionToken = "")
+    public function __construct($sessionToken = "")
     {
         if ($sessionToken !== "")
         {
@@ -26,7 +26,7 @@ class User
         }
     }
 
-    function Login($email, $password)
+    public function Login($email, $password)
     {
         $this->email = $email;
         $row = $this->_FindMatchingEmail($email);
@@ -48,27 +48,27 @@ class User
         }
     }
 
-    function GetEmail()
+    public function GetEmail()
     {
         return $this->session->GetSessionEmail();
     }
 
-    function GetSession()
+    public function GetSession()
     {
         return $this->session;
     }
 
-    function GetSecurity()
+    public function GetSecurity()
     {
         return $this->security;
     }
 
-    function GetID()
+    public function GetID()
     {
         return $this->id;
     }
 
-    function OtherUserExists($email)
+    public function OtherUserExists($email)
     {
         if ($this->security->HasSecurityPoint(1)) // Create user
         {
@@ -80,7 +80,7 @@ class User
         }
     }
 
-    function IsLoggedIn()
+    public function IsLoggedIn()
     {
         return !$this->session->TokenIsExpired();
     }
@@ -101,7 +101,7 @@ class User
         }
         else
         {
-            return $statement->fetch(PDO::FETCH_ASSOC);
+            return $statement->fetchAll(PDO::FETCH_ASSOC)[0];
         }
     }
 
@@ -113,7 +113,16 @@ class User
 
     private function GetUserId()
     {
-        $props = $this->_FindMatchingEmail($this->session->GetSessionEmail());
+        $email = $this->session->GetSessionEmail();
+        $query = "SELECT ID, Email FROM User WHERE Email = ? and User.Active = 1";
+
+        $pdo = CreateDBConnection("useraccess");
+        $statement = $pdo->prepare($query);
+        $statement->execute([
+            mysql_escape_string($email)
+        ]);
+        
+        $props = $statement->fetch(PDO::FETCH_ASSOC);
         return $props["ID"];
     }
 }
