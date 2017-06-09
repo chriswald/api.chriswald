@@ -55,7 +55,7 @@ class ApiLink
             $httpStatusCode = $e->getStatusCode();
             $responseContentType = "application/json";
             $obj = $e->getObject();
-            if (isstring($obj))
+            if (is_string($obj))
             {
                 $responseObject = json_encode(["Error" => $obj]);
             }
