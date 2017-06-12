@@ -8,14 +8,17 @@ function ExecInit($params)
     $pdo = CreateDBConnection("useraccess");
     $user = new User($sessionToken);
 
-    $file = GetTrackFile($pdo, $trackHash, $user->GetID());
+    $filenames = GetTrackFile($pdo, $trackHash, $user->GetID());
 
-    if (count($file) !== 0)
+    if (count($filenames) !== 0)
     {
-        $file = $file[0]["File"];
-        return [
-            "Track" => "https://content.chriswald.com/music/$file"
-        ];
+        $filename = $filenames[0]["File"];
+        $fullpath = realpath("../../content.chriswald.com/music/$filename");
+        $handle = fopen($fullpath, "rb");
+        $contents = fread($handle, filesize($fullpath));
+        fclose($handle);
+
+        return $contents;
     }
 }
 

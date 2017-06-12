@@ -43,6 +43,6 @@
     "Result": {
         "DataGroup": "Result",
         "NameInGroup": "ScriptResult",
-        "ContentType": "application/json"
+        "ContentType": "audio/mpeg"
     }
 }
