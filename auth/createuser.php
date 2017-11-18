@@ -29,6 +29,7 @@ function CreateUserMYSQL($email, $password)
 function CreateNewUser()
 {
 	$email = $_POST["email"];
+	$user = new User();
 	if (!$user->OtherUserExists($email))
 	{
 		CreateUserMYSQL($email, $_POST["password"]);
