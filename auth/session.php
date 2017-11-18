@@ -80,13 +80,13 @@ class Session
     function GenerateSessionToken($email)
     {
         $this->email = $email;
-        $now = time();
-        $then = $now + (30 * 60); // 30 minutes
+        $this->generatedTime = time();
+        $this->expiresTime = $this->generatedTime + (30 * 60); // 30 minutes
 
         $data = json_encode(array(
             "email" => $email,
-            "generated" => $now,
-            "expires" => $then
+            "generated" => $this->generatedTime,
+            "expires" => $this->expiresTime
         ));
 
         $this->token = $this->_EncryptToken($data);
