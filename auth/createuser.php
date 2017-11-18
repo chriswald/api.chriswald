@@ -28,17 +28,52 @@ function CreateUserMYSQL($email, $password)
 
 function CreateNewUser()
 {
-	$email = $_POST["email"];
-	$user = new User();
-	if (!$user->OtherUserExists($email))
+	$user = null;
+    $sessionToken = $_POST["SessionToken"];
+	
+	if ($sessionToken)
 	{
-		CreateUserMYSQL($email, $_POST["password"]);
-		EchoResult(True, "", $email);
+		$user = new User($sessionToken);
 	}
 	else
 	{
-		EchoResult(False, "A user with that email aready exists");
+		try
+		{
+			$user = new User();
+			$email = $_POST["SuEmail"];
+			$pass  = $_POST["SuPassword"];
+			$user->Login($email, $pass);
+		}
+		catch (Exception $e)
+		{
+			EchoResult(False, "Super user not logged in");
+			return;
+		}
 	}
+	
+	if ($user == null)
+	{
+		EchoResult(False, "No super user");
+		return;
+	}
+
+    if ($user->GetSecurity()->HasSecurityPoint(1)) // 1 = Create user security point
+    {
+        $email = $_POST["email"];
+        if (!$user->OtherUserExists($email))
+        {
+            CreateUserMYSQL($email, $_POST["password"]);
+            EchoResult(True, "", $email);
+        }
+        else
+        {
+            EchoResult(False, "A user with that email aready exists");
+        }
+    }
+    else
+    {
+        EchoResult(False, "Missing required security");
+    }
 }
 
 CreateNewUser();
