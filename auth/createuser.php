@@ -4,7 +4,7 @@ include_once "user.php";
 include_once "createconnection.php";
 include_once "authcore.php";
 
-function EchoResult($result, $email = "")
+function EchoResult($result, $reason = "", $email = "")
 {
     echo json_encode(array(
         "Result" => $result,
@@ -27,27 +27,16 @@ function CreateUserMYSQL($email, $password)
 
 function CreateNewUser()
 {
-    $sessionToken = $_POST["SessionToken"];
-
-    $user = new User($sessionToken);
-
-    if ($user->GetSecurity()->HasSecurityPoint(1)) // 1 = Create user security point
-    {
-        $email = $_POST["email"];
-        if (!$user->OtherUserExists($email))
-        {
-            CreateUserMYSQL($email, $_POST["password"]);
-            EchoResult(True, $email);
-        }
-        else
-        {
-            EchoResult("email");
-        }
-    }
-    else
-    {
-        EchoResult("security");
-    }
+	$email = $_POST["email"];
+	if (!$user->OtherUserExists($email))
+	{
+		CreateUserMYSQL($email, $_POST["password"]);
+		EchoResult(True, "", $email);
+	}
+	else
+	{
+		EchoResult(False, "A user with that email aready exists");
+	}
 }
 
 CreateNewUser();
