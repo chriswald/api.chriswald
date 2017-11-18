@@ -8,6 +8,7 @@ function EchoResult($result, $reason = "", $email = "")
 {
     echo json_encode(array(
         "Result" => $result,
+		"Reason" => $reason,
         "Email" => $email
     ));
 }
