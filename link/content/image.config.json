@@ -1,0 +1,51 @@
+{
+    "Security": {
+        "RequiredPoints": [8]
+    },
+
+    "HttpMethod": "POST",
+
+    "RequestParameters": [
+        "SessionToken"
+    ],
+
+    "FileParameters": [
+        "Image"
+    ],
+
+    "DataGroups": [
+        "ScriptResult"
+    ],
+
+    "DataSources": [
+        {
+            "Type": "Script",
+            "Parameters": [
+                {
+                    "Source": "FileParameters",
+                    "SourceParameterName": "Image",
+                    "DestinationParameterName": "Image"
+                },
+                {
+                    "Source": "RequestParameters",
+                    "SourceParameterName": "SessionToken",
+                    "DestinationParameterName": "SessionToken"
+                }
+            ],
+            "Properties": {
+                "File": "content/scripts/image/create.php",
+                "EntryPoint": "ExecInit"
+            },
+            "Result": {
+                "DataGroup": "ScriptResult",
+                "NameInGroup": "CreateResult"
+            }
+        }
+    ],
+
+    "Result": {
+        "DataGroup": "ScriptResult",
+        "NameInGroup": "CreateResult",
+        "ContentType": "application/json"
+    }
+}

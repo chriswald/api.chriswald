@@ -12,6 +12,15 @@ class RequestParametersSection extends ApiConfigSection
 
     protected function ParseSection($config)
     {
+        if ($_SERVER["REQUEST_METHOD"] === "POST")
+        {
+            $post_vars = $_POST;
+        }
+        else
+        {
+            parse_str(file_get_contents("php://input"), $post_vars);
+        }
+
         if (isset($config->RequestParameters))
         {
             $this->HasSection = true;
@@ -23,7 +32,7 @@ class RequestParametersSection extends ApiConfigSection
                 
                 foreach ($this->SectionValue as $param)
                 {
-                    if (!isset($_POST[$param]))
+                    if (!isset($post_vars[$param]))
                     {
                         throw new LinkException(400, "Missing request parameter $param");
                     }

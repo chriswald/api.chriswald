@@ -193,7 +193,15 @@ class ApiLink
         {
             if (in_array($srcName, $this->_requestParametersSection->SectionValue))
             {
-                $parameter = $_POST[$srcName];
+                if ($_SERVER["REQUEST_METHOD"] === "POST")
+                {
+                    $post_vars = $_POST;
+                }
+                else
+                {
+                    parse_str(file_get_contents("php://input"), $post_vars);
+                }
+                $parameter = $post_vars[$srcName];
             }
             else 
             {
@@ -339,6 +347,11 @@ class ApiLink
         if ($_SERVER["REQUEST_METHOD"] === "GET")
         {
             return $_GET["SessionToken"];
+        }
+        else if ($_SERVER["REQUEST_METHOD"] === "PUT")
+        {
+            parse_str(file_get_contents("php://input"), $post_vars);
+            return $post_vars["SessionToken"];
         }
         else
         {
