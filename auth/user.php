@@ -70,14 +70,7 @@ class User
 
     public function OtherUserExists($email)
     {
-        if ($this->security->HasSecurityPoint(1)) // Create user
-        {
-            return !!$this->_FindMatchingEmail($email);
-        }
-        else
-        {
-            return False;
-        }
+        return !!$this->_FindMatchingEmail($email);
     }
 
     public function IsLoggedIn()
