@@ -23,7 +23,7 @@ function ListPoints()
     $sessionToken = $_POST["SessionToken"];
     $user = new User($sessionToken);
 
-    if ($user->GetSecurity()->HasSecurityPoint(1)) // 1 = Create user security point
+    if ($user->GetSecurity()->HasSecurityPoint(5)) // 5 = Modify security security point
     {
         EchoResult(ListPointsMySQL());
     }
